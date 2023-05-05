@@ -35,7 +35,18 @@ def read_device_value_list(db: Session = Depends(get_db)) -> list[DeviceValueRea
     print(json_compatible_item_data)
     return device_values
 
+# http://127.0.0.1:8000/api/v1/update_data/did
+@router.get("/update_data/{did}", response_model=DeviceValueRead)
+def update_data(did: int, db: Session = Depends(get_db)) -> DeviceValueRead:
+    device_value = crud_device_value.get_by_id(db, did)
+    return device_value    
 
+# http://127.0.0.1:8000/api/v1/update_data/did
+@router.get("/chart/{did}", response_model=list[DeviceValueRead])
+def chart(did: int, db: Session = Depends(get_db)) -> list[DeviceValueRead]:
+    device_values = crud_device_value.get_chart_by_id(db, did)
+    return device_values
+    
 # http://127.0.0.1:8000/api/v1/insert?did=1&v1=10&v2=20
 @router.get("/insert")
 def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,

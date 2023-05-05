@@ -33,6 +33,11 @@ async def login(request: Request):
 @router.get("/main", response_class=HTMLResponse) 
 async def main(request: Request, db: Session = Depends(get_db)): 
     devices = crud_device.get_all(db)
-    return templates.TemplateResponse("main.html", {"request": request, "devices": devices, "user": 0}) 
+    return templates.TemplateResponse("main.html", {"request": request, "devices": devices}) 
+
+@router.get("/admin", response_class=HTMLResponse) 
+async def main(request: Request, db: Session = Depends(get_db)): 
+    devices = crud_device.get_all(db)
+    return templates.TemplateResponse("admin.html", {"request": request, "devices": devices}) 
 
     

@@ -13,13 +13,13 @@
     <script src="{{ my_url_for(request, 'static', path='/js/jquery.easing.min.js')}}"></script>
     <script src="{{ my_url_for(request, 'static', path='/js/bootstrap.min.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <script type="text/javascript">
 
-    //var ip = "localhost:8000";
-    var ip = "43.201.115.217";
-    
+    var ip = "localhost:8000";
+    //var ip = "43.201.115.217";
     // user state 
     // ID
     var user_name = "test name";
@@ -38,22 +38,13 @@
             {id: {{ device.id }},name: "{{ device.name }}", status: "{{ device.status }}", 
             alert_v_rate1: {{ device.alert_v_rate1 }},alert_v_rate2: {{ device.alert_v_rate2 }},alert_v_rate3: {{ device.alert_v_rate3 }}, 
             alert_a_rate1: {{ device.alert_a_rate1 }},alert_a_rate2: {{ device.alert_a_rate2 }},alert_a_rate3: {{ device.alert_a_rate3 }}, 
-            common_place : {{ device.common_place }}, floor : {{ device.floor }}, number : "{{ device.number }}"
-        },
+            COMMON_PLACE : {{ device.common_place }}},
         {% endfor %}
     ];
 
-    function getStateColor(error) {
-        if (error != 0) {
-            return "🔴";
-        } else {
-            return "🟢";
-        }
-    }
-
-    function getCleanStateColor(base, current) {
+    function getStateColor(base, current) {
         if (base < current) {
-            return "🟠";
+            return "🔴";
         } else {
             return "🟢";
         }
@@ -61,31 +52,23 @@
 
     // 관리자 인지 판단하기.
 
-    var lineChartV;
-    var lineChartA;
-
+    var lineChartV1;
+    var lineChartV2;
+    var lineChartV3;
+    
     function chartInit() {
-        var ctx = document.getElementById('chart_v');
-        lineChartV = new Chart(ctx, {
+        var ctx = document.getElementById('chart_v1');
+        lineChartV1 = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'CH1',
-                    data: [],
-                    borderWidth: 1
-                },{
-                    label: 'CH2',
-                    data: [],
-                    borderWidth: 1
-                },{
-                    label: 'CH3',
+                    label: 'CH1 전압',
                     data: [],
                     borderWidth: 1
                 }]
             },
             options: {
-                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         align: 'start'
@@ -102,27 +85,46 @@
             }
         });
 
-        var ctx = document.getElementById('chart_a');
-        lineChartA = new Chart(ctx, {
+        var ctx = document.getElementById('chart_v2');
+        lineChartV2 = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'CH1',
-                    data: [],
-                    borderWidth: 1
-                },{
-                    label: 'CH2',
-                    data: [],
-                    borderWidth: 1
-                },{
-                    label: 'CH3',
+                    label: 'CH2 전압',
                     data: [],
                     borderWidth: 1
                 }]
             },
             options: {
-                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        align: 'start'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        display: false // x축 라벨 비활성화
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById('chart_v3');
+        lineChartV3 = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'CH3 전압',
+                    data: [],
+                    borderWidth: 1
+                }]
+            },
+            options: {
                 plugins: {
                     legend: {
                         align: 'start'
@@ -140,12 +142,11 @@
         });
     }
 
-    function drawLineChart(chart, array1, array2, array3) {
-        //console.log(lineChartV1);
-        chart.data.labels = array1;
-        chart.data.datasets[0].data = array1;
-        chart.data.datasets[1].data = array2;
-        chart.data.datasets[2].data = array3;
+    function drawLineChart(chart, array) {
+        
+        console.log(lineChartV1);
+        chart.data.labels = array;
+        chart.data.datasets[0].data = array;
         
         chart.update();
     }
@@ -154,19 +155,27 @@
     function makeDeviceCell(device) {
         var cell = 
         `<tr>
-            <td rowspan='3'><div><div>${device.floor}층 - ${device.number}</div><button style="margin-top:10px" id="graph_button_${device.id}" type="submit" class="btn btn-primary">그래프 보기</button></div></td>
+            <td rowspan='3'><div><div>${device.id}</div><button style="margin-top:10px" id="graph_button_${device.id}" type="submit" class="btn btn-primary">그래프 보기</button></div></td>
             <td id="${device.id}_1_state">🟢</td>
             <td>CH1</td>
             <td id="${device.id}_1_v"></td>
             <!-- <td><input type="number" name="edittext" id="${device.id}_1_bv" value="${device.alert_v_rate1}"> kV</td> -->
             <td id="${device.id}_1_a"></td>
             <td>${device.alert_a_rate1}mA</td>
-
-            <td id="${device.id}_1_clean_state">🟢</td>
             <td rowspan='3'></td>
             <td rowspan='3'></td>
             <td rowspan='3'></td>
-            
+            <td rowspan='3'>
+                <div>
+                    <button id="v_button_${device.id}" type="submit" class="btn btn-primary">기준전압 셋팅</button>
+                </div>
+                <div style="margin-top:10px;display:none">
+                    <button id="a_button_${device.id}" type="submit" class="btn btn-primary">기준전류 셋팅</button>
+                </div>
+                <div style="margin-top:10px">
+                    <button id="add_user_button_${device.id}" type="submit" class="btn btn-primary">사용자 추가</button>
+                </div>
+            </td>
         </tr>
         <tr>
             <td id="${device.id}_2_state">🟢</td>
@@ -175,8 +184,6 @@
             <!-- <td><input type="number" name="edittext" id="${device.id}_2_bv" value="${device.alert_v_rate2}"> kV</td> -->
             <td id="${device.id}_2_a"></td>
             <td>${device.alert_a_rate2}mA</td>
-
-            <td id="${device.id}_2_clean_state">🟢</td>
             
         </tr>
         <tr>
@@ -186,12 +193,50 @@
             <!-- <td><input type="number" name="edittext" id="${device.id}_3_bv" value="${device.alert_v_rate3}"> kV</td> -->
             <td id="${device.id}_3_a"></td>
             <td>${device.alert_a_rate3}mA</td>
-
-            <td id="${device.id}_3_clean_state">🟢</td>
             
         </tr>`
 
         $("#table").append(cell);
+
+        $("#v_button_" + device.id).click( function() {            
+            var baseVolt1 = $("#" + device.id + "_1_bv").val();
+            var baseVolt2 = $("#" + device.id + "_2_bv").val();
+            var baseVolt3 = $("#" + device.id + "_3_bv").val();
+
+            const data = { 
+                id: device.id,
+                alert_v_rate1 : baseVolt1,
+                alert_v_rate2 : baseVolt2,
+                alert_v_rate3 : baseVolt3
+            };
+
+            fetch('http://'+ip+'/update_base_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.message == "success") {
+                    //update
+
+                    for (var i = 0;i<deviceList.length;i++) {
+                        if(deviceList[i].id == device.id) {
+                            deviceList[i].alert_v_rate1 = baseVolt1;
+                            deviceList[i].alert_v_rate2 = baseVolt2;
+                            deviceList[i].alert_v_rate3 = baseVolt3;
+                        }
+                    }
+                
+                    $("#" + device.id + "_1_state").text(getStateColor(baseVolt1, Number($("#" + device.id + "_1_v").text().split("kV")[0])));
+                    $("#" + device.id + "_2_state").text(getStateColor(baseVolt2, Number($("#" + device.id + "_2_v").text().split("kV")[0])));
+                    $("#" + device.id + "_3_state").text(getStateColor(baseVolt3, Number($("#" + device.id + "_3_v").text().split("kV")[0])));
+                }
+            })
+            .catch(error => console.error(error))
+        });
 
         $("#graph_button_" + device.id).click( function() {
             const drawer = $('#drawer');
@@ -199,40 +244,37 @@
             drawer.toggleClass('closed'); 
             
             if(drawer.hasClass('open')) {
-                var url = 'http://'+ip+'/api/v1/chart/' + device.id;
+                console.log(device.id);
+                const data = { 
+                    id: device.id
+                };
 
-                fetch(url).then(response => {
-                    if (!response.ok) {
-                      throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                }).then(data => {
-                    var list = data;
+                fetch('http://'+ip+'/chart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var list = data.value;
                     var v1Array = [];
                     var v2Array = [];
                     var v3Array = [];
-
-                    var a1Array = [];
-                    var a2Array = [];
-                    var a3Array = [];
 
                     for (var i = 0; i<list.length;i++) {
                         v1Array.unshift(list[i].v1 != null ? list[i].v1 : 0);
                         v2Array.unshift(list[i].v2 != null ? list[i].v2 : 0);
                         v3Array.unshift(list[i].v3 != null ? list[i].v3 : 0);
-
-                        a1Array.unshift(list[i].a1 != null ? list[i].a1 : 0);
-                        a2Array.unshift(list[i].a2 != null ? list[i].a2 : 0);
-                        a3Array.unshift(list[i].a3 != null ? list[i].a3 : 0);
                     }
 
-                    drawLineChart(lineChartV, v1Array,v2Array,v3Array);
-                    drawLineChart(lineChartA, a1Array,a2Array,a3Array);
-
-
-                }).catch(error => {
-                    console.log(error);
-                });
+                    drawLineChart(lineChartV1, v1Array);
+                    drawLineChart(lineChartV2, v2Array);
+                    drawLineChart(lineChartV3, v3Array);
+                                    
+                })
+                .catch(error => console.error(error))
             }
         });
 
@@ -241,37 +283,36 @@
 
     function updateData() {
         for(const device of deviceList) { 
-            var url = 'http://'+ip+'/api/v1/update_data/' + device.id;
+            const data = { 
+                id: device.id
+            };
+            
+            fetch('http://'+ip+'/update_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                var id = data.value.did;
+                $("#" + id + "_1_v").text(data.value.v1/1000 + "kV");
+                $("#" + id + "_2_v").text(data.value.v2/1000 + "kV");
+                $("#" + id + "_3_v").text(data.value.v3/1000 + "kV");
 
-            fetch(url).then(response => {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json();
-              }).then(data => {
-                if(data == null) return;
-                var id = data.did;
-                
-                $("#" + id + "_1_v").text(data.v1/1000 + "kV");
-                $("#" + id + "_2_v").text(data.v2/1000 + "kV");
-                $("#" + id + "_3_v").text(data.v3/1000 + "kV");
+                $("#" + id + "_1_a").text(data.value.c1/1000 + "mA");
+                $("#" + id + "_2_a").text(data.value.c2/1000 + "mA");
+                $("#" + id + "_3_a").text(data.value.c3/1000 + "mA");
 
-                $("#" + id + "_1_a").text(data.c1/1000 + "mA");
-                $("#" + id + "_2_a").text(data.c2/1000 + "mA");
-                $("#" + id + "_3_a").text(data.c3/1000 + "mA");
-
-                console.log(data.e1 + " " +data.e2+ " " +data.e3);
-                $("#" + id + "_1_state").text(getStateColor(data.e1));
-                $("#" + id + "_2_state").text(getStateColor(data.e2));
-                $("#" + id + "_3_state").text(getStateColor(data.e3));
 
                 //console.log(device.alert_v_rate1 + " " + data.value.v1/1000);
-                $("#" + id + "_1_clean_state").text(getCleanStateColor(device.alert_a_rate1, data.c1/1000));
-                $("#" + id + "_2_clean_state").text(getCleanStateColor(device.alert_a_rate2, data.c2/1000));
-                $("#" + id + "_3_clean_state").text(getCleanStateColor(device.alert_a_rate3, data.c3/1000));
-              }).catch(error => {
-                console.log(error);
-              });
+                $("#" + id + "_1_state").text(getStateColor(device.alert_v_rate1, data.value.v1/1000));
+                $("#" + id + "_2_state").text(getStateColor(device.alert_v_rate2, data.value.v2/1000));
+                $("#" + id + "_3_state").text(getStateColor(device.alert_v_rate3, data.value.v3/1000));
+                
+            })
+            .catch(error => console.error(error))
         }
         //${device.id}_1_v
     }
@@ -290,9 +331,8 @@
             }
         })
         .then((json) => {
-            //alert(json);
+            alert(json);
             console.log(json);
-            $("#user_name").text(json.email);
         })
         .catch((error) => {
             alert("잘못된 접근입니다.");
@@ -311,8 +351,8 @@
         }
         chartInit();
 
-        setInterval(updateData, 30000);
-        updateData();
+        //setInterval(updateData, 30000);
+        //updateData();
         
     });
 
@@ -322,6 +362,7 @@
     <header>
         <img style="margin-left:10px;" id="logo" src="https://via.placeholder.com/50x50">
         <div id="header-text">YB 빌딩</div>
+        <div id="device_register" style="margin-right: 10px; cursor: pointer;">기기등록</div>
         <div id="user_name" style="margin-right: 10px;">test이름</div>
     </header>
     <table>
@@ -333,11 +374,10 @@
                 <th>전압</th>
                 <th>전류</th>
                 <th>기준전류</th>
-                <th>청소</th>
                 <th>온도</th>
                 <th>습도</th>
                 <th>차압</th>
-
+                <th>셋팅</th>
             </tr>
         </thead>
         <tbody id="table">
@@ -352,19 +392,21 @@
         .chart {
             margin-left: 10px;
             margin-right: 10px;
-            width: 50%;
-            height: 40%;
         }
         
     </style>
     <div id="drawer" class="closed">
-        <span class="graph_title">전압 그래프</span>
+        <span class="graph_title">CH1 전압 그래프</span>
         <div>
-            <canvas class="chart" id="chart_v"></canvas>
+            <canvas class="chart" id="chart_v1"></canvas>
         </div>
-        <span class="graph_title">전류 그래프</span>
+        <span class="graph_title">CH2 전압 그래프</span>
         <div>
-            <canvas class="chart" id="chart_a"></canvas>
+            <canvas class="chart" id="chart_v2"></canvas>
+        </div>
+        <span class="graph_title">CH3 전압 그래프</span>
+        <div>
+            <canvas class="chart" id="chart_v3"></canvas>
         </div>
     </div>
 

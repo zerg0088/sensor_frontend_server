@@ -14,7 +14,6 @@ def init() -> None:
     db = SessionLocal()
     init_db(db)
 
-
 app = FastAPI()
 
 app.add_middleware(

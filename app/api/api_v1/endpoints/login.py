@@ -13,7 +13,6 @@ Base.metadata.create_all(bind=engine)
 
 router = APIRouter()
 
-
 @router.post("/register")
 def post(user: UserCreate, db: Session = Depends(get_db)):
     db_user = crud_user.get_by_email(db, email=user.email)

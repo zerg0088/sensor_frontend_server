@@ -1,0 +1,64 @@
+/* 헤더 스타일 */
+header {
+    background-color: #333;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  /* 로고 이미지 스타일 */
+  #logo {
+    width: 50px;
+    height: 50px;
+  }
+  /* 오른쪽 텍스트 스타일 */
+  #header-text {
+    font-size: 18px;
+    margin-right: auto;
+    margin-left: 20px;
+  }
+  /* 표 스타일 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 80px;
+  }
+  th, td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+
+  input {
+      width: 100px;
+  }
+
+  #drawer {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      right: -50;
+      height: 100%;
+      width: 50%;
+      background-color: #fff;
+      z-index: 1;
+      transition: right 0.3s ease-out;
+      border: 1px solid black;
+  }
+  
+  #drawer.open {
+      right: 0;
+  }
+  
+  #drawer.closed {
+      right: -50%;
+  }
+  

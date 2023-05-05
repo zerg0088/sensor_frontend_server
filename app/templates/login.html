@@ -25,27 +25,37 @@
             var jsonData = {
                 "email": "admin@gmail.com", 
                 "password": "54ecv9g8",
-            };  
-            $.ajax({
-                type: "POST",
-                url: "/api/v1/login/access-token", 
-                data: JSON.stringify(jsonData),
-                dataType: "JSON",
-                contentType: "application/json; charset=utf-8", 
-                success: function(json) {
-                    var access_token = json.access_token;
-                    localStorage.setItem("access_token", access_token); // 토큰 저장
-                    window.location.href = "/main"; 
-                    //alert("완료되었습니다." + json);
-                    // page move
-                    return;
+            }; 
+
+            fetch("/api/v1/login/access-token", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonData),
+              })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Failed to login.");
                 }
-            });      
+            })
+            .then((json) => {
+                const access_token = json.access_token;
+                localStorage.setItem("access_token", access_token);
+                window.location.href = "/main";
+            })
+            .catch((error) => {
+                console.error(error);
+                alert("Failed to login.");
+            });
 
         });
     
     });
-
+    
+    
 </script>
 </head>
 
