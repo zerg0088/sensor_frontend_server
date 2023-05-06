@@ -340,6 +340,106 @@
         }
     }
 
+    // popup function
+    function showPlaceRegisterPopup() {
+        document.getElementById("place_popup").style.display = "block";
+    }
+    function hidePlaceRegisterPopup() {
+        document.getElementById("place_popup").style.display = "none";
+    }
+
+    function sendPlaceData() {
+        var name = document.getElementById("place_name").value;
+        var url = 'http://'+ip+'/api/v1/add_place';
+
+        fetch(url,{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                name: name
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(data => {
+            alert("장소등록 했습니다.");
+        }).catch(error => {
+            console.log(error);
+        });
+
+        hidePlaceRegisterPopup(); // 팝업 닫기
+    }
+
+
+    function showDeviceRegisterPopup() {
+        var url = 'http://'+ip+'/api/v1/place_list';
+
+        fetch(url).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(data => {
+            $("#device_place").html("");
+            for( var i = 0;i< data.length; i++) {
+                $("#device_place").append('<option value="'+ data[i].id +'">' + data[i].name + '</option>')
+            }
+            console.log(data);
+        }).catch(error => {
+            console.log(error);
+        });
+        document.getElementById("device_popup").style.display = "block";
+    }
+    function hideDeviceRegisterPopup() {
+        document.getElementById("device_popup").style.display = "none";
+    }
+
+    function sendDeviceData() {
+        var id = document.getElementById("device_id").value;
+        var name = document.getElementById("device_name").value;
+        var a1 = document.getElementById("device_a1_rate").value;
+        var a2 = document.getElementById("device_a2_rate").value;
+        var a3 = document.getElementById("device_a3_rate").value;
+        var floor = document.getElementById("device_floor").value;
+        var number = document.getElementById("device_number").value;
+        var placeId = $("#device_place option:selected").val();
+        
+        var url = 'http://'+ip+'/api/v1/add_device';
+        
+        fetch(url,{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                id : id,
+                name: name,
+                status : 'Active',
+                alert_a_rate1 : a1,
+                alert_a_rate2 : a2,
+                alert_a_rate3 : a3,
+                place_id : placeId,
+                floor : floor,
+                number : number
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }).then(data => {
+            alert("기기등록 했습니다.");
+        }).catch(error => {
+            console.log(error);
+        });
+
+        hidePlaceRegisterPopup(); // 팝업 닫기
+    }
+
     $( window ).ready( function() {
         fetch("/api/v1/users/me", {
             method: "GET",
@@ -355,8 +455,6 @@
             }
         })
         .then((json) => {
-            //alert(json);
-            console.log(json);
             $("#user_name").text(json.email);
 
             if(json.is_superuser != 1) {
@@ -373,8 +471,14 @@
         $("#user_name").text(user_name);
 
         $('#device_register').click( function() {            
-            alert("device register");
+            showDeviceRegisterPopup();
         });
+
+        $('#place_register').click( function() {            
+            showPlaceRegisterPopup();
+        });
+
+        
         $("#table").html("");
         for(const device of deviceList) { 
             makeDeviceCell(device);
@@ -388,6 +492,36 @@
 
 </script>
 </head>
+
+<style>
+    /* 팝업 레이아웃 스타일 */
+    .popup {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .popup-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: 420px;
+        height: 340px;
+        background-color: white;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .popup_input {
+        width: 300px;
+        height: 30px;
+    }
+</style>
+
 <body>
     <header>
         <img style="margin-left:10px;" id="logo" src="https://via.placeholder.com/50x50">
@@ -396,6 +530,7 @@
         <div id="device_register" style="margin-right: 10px; cursor: pointer;">기기등록</div>
         <div id="user_name" style="margin-right: 10px;">test이름</div>
     </header>
+
     <table>
         <thead>
             <tr>
@@ -426,6 +561,85 @@
             <canvas class="chart" id="chart_a"></canvas>
         </div>
     </div>
+
+    <div class="popup" id="place_popup">
+		<div class="popup-content">
+			<!-- 팝업 내용 -->
+            <div>
+                <span style="display:inline">위치 이름 :</span>
+			    <input style="display:inline; width : auto" type="text" id="place_name">
+            </div>
+			<div style="margin-top: 30px;">
+                <button onclick="sendPlaceData()">추가</button>
+			    <button onclick="hidePlaceRegisterPopup()">닫기</button>
+            </div>
+			
+		</div>
+	</div>
+
+
+    <div class="popup" id="device_popup">
+		<div class="popup-content">
+			<!-- 팝업 내용 -->
+            <div style="display: flex; flex-direction: row;">
+                <div>
+                    <span style="display:inline">디바이스 아이디 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_id" value="-1">
+                </div>
+    
+                <div style="margin-left:10px">
+                    <span style="display:inline">디바이스 이름 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_name" value="-1">
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: row;">
+                <div>
+                    <span style="display:inline">CH1 기준전류 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type=number step=0.01 id="device_a1_rate" value="-1">
+                </div>
+                <div style="margin-left:10px">
+                    <span style="display:inline">CH2 기준전류 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type=number step=0.01 id="device_a2_rate"value="-1">
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: row;">
+                <div>
+                    <span style="display:inline">CH3 기준전류 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type=number step=0.01 id="device_a3_rate"value="-1">
+                </div>
+                <div>
+                    <span style="display:inline; margin-left:10px">디바이스 위치 :</span>
+                    <div style="display:inline; width : auto" class="container">
+                        <select id="device_place" style="width : 180px">
+                            <!-- <option value="option-1">Option 1</option>
+                            <option value="option-2">Option 2</option>
+                            <option value="option-3">Option 3</option> -->
+                        </select>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div style="display: flex; flex-direction: row;">
+                <div>
+                    <span style="display:inline">층 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type="number" id="device_floor" value="-1">
+                </div>
+                <div style="margin-left:10px">
+                    <span style="display:inline">공조기 번호 :</span>
+                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_number" value="-1">
+                </div>
+            </div>
+            
+			<div style="margin-top: 30px;">
+                <button onclick="sendDeviceData()">추가</button>
+			    <button onclick="hideDeviceRegisterPopup()">닫기</button>
+            </div>
+			
+		</div>
+	</div>
 
 </body>
 </html>

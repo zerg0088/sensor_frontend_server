@@ -21,7 +21,6 @@ def read_devices(db: Session = Depends(get_db)) -> list[DeviceRead]:
     print(json_compatible_item_data)
     return devices
 
-
 @router.post("/add_device")
 def add_device(device: DeviceCreate, db: Session = Depends(get_db)):
     return crud_device.create(db=db, obj_in=device)
@@ -60,22 +59,6 @@ def update_device(*, device_id: int, device_in: DeviceUpdate, db: Session = Depe
         )
     device = crud_device.update(db, db_obj=device, obj_in=device_in)
     return device   
-    
-# @app.post("/update_base_data")
-# async def update_base_device(data: dict):
-#     print(data)
-#     try:
-#         with conn.cursor() as cursor:
-#             print(data)
-#             sql = "UPDATE device SET ALERT_V_RATE1 = %s, ALERT_V_RATE2 = %s, ALERT_V_RATE3 = %s WHERE ID = %s"
-#             values = (data['alert_v_rate1'], data['alert_v_rate2'], data['alert_v_rate3'], data['id'])
-#             cursor.execute(sql, values)
-#             conn.commit()
-            
-#             return {"message": "success"}
-#     except Exception as e:
-#         print("ss error 2" + str(e))
-#         return {"message": "error"}    
     
 # http://127.0.0.1:8000/api/v1/insert?did=1&v1=10&v2=20
 @router.get("/insert")
