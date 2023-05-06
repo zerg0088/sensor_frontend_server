@@ -36,8 +36,8 @@ def read_device_value_list(db: Session = Depends(get_db)) -> list[DeviceValueRea
     return device_values
 
 # http://127.0.0.1:8000/api/v1/update_data/did
-@router.get("/update_data/{did}", response_model=DeviceValueRead)
-def update_data(did: int, db: Session = Depends(get_db)) -> DeviceValueRead:
+@router.get("/update_data/{did}")
+def update_data(did: int, db: Session = Depends(get_db)) :
     device_value = crud_device_value.get_by_id(db, did)
     print(device_value)
     return device_value    
