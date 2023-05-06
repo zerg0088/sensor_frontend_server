@@ -39,9 +39,10 @@ def read_device_value_list(db: Session = Depends(get_db)) -> list[DeviceValueRea
 @router.get("/update_data/{did}", response_model=DeviceValueRead)
 def update_data(did: int, db: Session = Depends(get_db)) -> DeviceValueRead:
     device_value = crud_device_value.get_by_id(db, did)
+    print(device_value)
     return device_value    
 
-# http://127.0.0.1:8000/api/v1/update_data/did
+# http://127.0.0.1:8000/api/v1/chart/did
 @router.get("/chart/{did}", response_model=list[DeviceValueRead])
 def chart(did: int, db: Session = Depends(get_db)) -> list[DeviceValueRead]:
     device_values = crud_device_value.get_chart_by_id(db, did)
@@ -49,7 +50,7 @@ def chart(did: int, db: Session = Depends(get_db)) -> list[DeviceValueRead]:
     return device_values
     
 # 기준 전류 셋팅. 
-@router.patch("/device_update/{device_id}", response_model=DeviceRead)
+@router.patch("device_update/{device_id}", response_model=DeviceRead)
 def update_device(*, device_id: int, device_in: DeviceUpdate, db: Session = Depends(get_db)) -> Any:
     device = crud_device.get(db, id=device_id)
     if not device:
