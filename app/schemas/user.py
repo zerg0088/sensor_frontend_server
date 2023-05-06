@@ -7,7 +7,7 @@ class UserBase(BaseModel):
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     organization: Optional[str] = ""
-    devices: Optional[str] = ""
+    place_id : Optional[int] = -1
 
 
 class UserCreate(UserBase):

@@ -61,4 +61,16 @@ header {
   #drawer.closed {
       right: -50%;
   }
+
+  .graph_title {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+}
+.chart {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 50%;
+    height: 40%;
+}
   

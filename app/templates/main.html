@@ -38,7 +38,7 @@
             {id: {{ device.id }},name: "{{ device.name }}", status: "{{ device.status }}", 
             alert_v_rate1: {{ device.alert_v_rate1 }},alert_v_rate2: {{ device.alert_v_rate2 }},alert_v_rate3: {{ device.alert_v_rate3 }}, 
             alert_a_rate1: {{ device.alert_a_rate1 }},alert_a_rate2: {{ device.alert_a_rate2 }},alert_a_rate3: {{ device.alert_a_rate3 }}, 
-            common_place : {{ device.common_place }}, floor : {{ device.floor }}, number : "{{ device.number }}"
+            place_id : {{ device.place_id }}, floor : {{ device.floor }}, number : "{{ device.number }}"
         },
         {% endfor %}
     ];
@@ -59,8 +59,10 @@
         }
     }
 
-    // 관리자 인지 판단하기.
 
+    var chartDateArray = [];
+    
+    // 관리자 인지 판단하기.
     var lineChartV;
     var lineChartA;
 
@@ -89,6 +91,13 @@
                 plugins: {
                     legend: {
                         align: 'start'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return chartDateArray[context.dataIndex];
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -126,6 +135,13 @@
                 plugins: {
                     legend: {
                         align: 'start'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return chartDateArray[context.dataIndex];
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -216,6 +232,8 @@
                     var a2Array = [];
                     var a3Array = [];
 
+                    chartDateArray = [];
+                    
                     for (var i = 0; i<list.length;i++) {
                         v1Array.unshift(list[i].v1 != null ? list[i].v1 : 0);
                         v2Array.unshift(list[i].v2 != null ? list[i].v2 : 0);
@@ -224,12 +242,13 @@
                         a1Array.unshift(list[i].a1 != null ? list[i].a1 : 0);
                         a2Array.unshift(list[i].a2 != null ? list[i].a2 : 0);
                         a3Array.unshift(list[i].a3 != null ? list[i].a3 : 0);
+
+                        chartDateArray.unshift(list[i].timestamp != null ? list[i].timestamp : 0);
                     }
 
                     drawLineChart(lineChartV, v1Array,v2Array,v3Array);
                     drawLineChart(lineChartA, a1Array,a2Array,a3Array);
-
-
+                    
                 }).catch(error => {
                     console.log(error);
                 });
@@ -343,20 +362,7 @@
         <tbody id="table">
         </tbody>
     </table>
-    <style>
-        .graph_title {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .chart {
-            margin-left: 10px;
-            margin-right: 10px;
-            width: 50%;
-            height: 40%;
-        }
-        
-    </style>
+
     <div id="drawer" class="closed">
         <span class="graph_title">전압 그래프</span>
         <div>

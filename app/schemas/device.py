@@ -12,7 +12,7 @@ class DeviceBase(BaseModel):
     alert_a_rate1: Optional[float] = 0.0
     alert_a_rate2: Optional[float] = 0.0
     alert_a_rate3: Optional[float] = 0.0
-    common_place: Optional[int] = 0
+    place_id : int = 0
     floor: Optional[int] = 0
     number: Optional[str] = ""
     create_at: Optional[datetime] = None

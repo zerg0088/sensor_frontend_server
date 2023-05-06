@@ -16,7 +16,7 @@ class Device(Base):
     alert_a_rate1 = Column(Float)
     alert_a_rate2 = Column(Float)
     alert_a_rate3 = Column(Float)
-    common_place = Column(Integer)
+    place_id = Column(Integer, nullable=False)
     floor = Column(Integer)
     number = Column(String(10))
     create_at = Column(DateTime(), server_default=text('NOW()'))

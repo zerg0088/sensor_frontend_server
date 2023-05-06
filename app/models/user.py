@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, String, Text
+from sqlalchemy import Boolean, Column, String, Text, Integer
 from sqlalchemy.dialects.mysql import INTEGER
 from app.db.session import Base
 
@@ -10,7 +10,7 @@ class User(Base):
     email = Column(String(255), unique=True, index=True)
     password = Column(String(255))
     organization = Column(String(255), default="")
-    devices = Column(Text, default="")
+    place_id = Column(Integer, default=-1)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean(), default=False)
     

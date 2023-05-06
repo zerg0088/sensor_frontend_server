@@ -2,21 +2,15 @@ from typing import Any, Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
+from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
-from app.models.device_value import DeviceValue
-from app.schemas.device_value import DeviceValueCreate, DeviceValueUpdate
+from app.models.place import Place
+from app.schemas.place import PlaceCreate, PlaceUpdate
 from sqlalchemy import Column, Integer, String, Boolean
 
-
-class CRUDDeviceValue(CRUDBase[DeviceValue, DeviceValueCreate, DeviceValueUpdate]):
-    def get_by_id(self, db: Session, did: int) -> list[DeviceValue]:
-        return db.query(self.model).filter(self.model.did == did).order_by(self.model.timestamp.desc()).first()
-    
-    def get_chart_by_id(self, db: Session, did: int) -> list[DeviceValue]:
-        return db.query(self.model.v1,self.model.v2,self.model.v3,self.model.c1,self.model.c2,self.model.c3,self.model.timestamp).filter(self.model.did == did).order_by(self.model.timestamp.desc()).limit(300).all()
-    
-    def get_all2(self, db: Session) -> list[DeviceValue]:
-        return db.query(DeviceValue).all()
+class CRUDPlace(CRUDBase[Place, PlaceCreate, PlaceUpdate]):
+    def get_all2(self, db: Session) -> list[Place]:
+        return db.query(Place).all()
     # def get_by_id(self, db: Session, *, id: Integer) -> Optional[Device]:
     #     return db.query(Device).filter(Device.id == id).first()
     
@@ -72,4 +66,4 @@ class CRUDDeviceValue(CRUDBase[DeviceValue, DeviceValueCreate, DeviceValueUpdate
     # def is_superuser(self, user: User) -> bool:
     #     return user.is_superuser
 
-crud_device_value = CRUDDeviceValue(DeviceValue)
+crud_place = CRUDPlace(Place)

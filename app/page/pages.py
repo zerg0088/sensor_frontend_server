@@ -13,6 +13,7 @@ from app.core.security import create_access_token
 from app.db.session import Base, engine, get_db
 from app.schemas.device import DeviceCreate
 from app.crud.device import crud_device
+from app.crud.place import crud_place
 
 router = APIRouter()
 
@@ -38,6 +39,7 @@ async def main(request: Request, db: Session = Depends(get_db)):
 @router.get("/admin", response_class=HTMLResponse) 
 async def main(request: Request, db: Session = Depends(get_db)): 
     devices = crud_device.get_all(db)
-    return templates.TemplateResponse("admin.html", {"request": request, "devices": devices}) 
+    places = crud_place.get_all(db)
+    return templates.TemplateResponse("admin.html", {"request": request, "devices": devices, "places" : places}) 
 
     
