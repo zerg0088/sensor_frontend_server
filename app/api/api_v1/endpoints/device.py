@@ -95,12 +95,16 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
     )
     
     device = crud_device.get_by_did(db, did)
+    if device == None : 
+        return 'device 없음'
+        
     users = crud_user.get_by_place(db, place_id=device.place_id)
     
     phoneList = []
-    for user in users :
-        if len(user.phone) > 5 :
-            phoneList.append(user.phone)
+    if users != None :
+        for user in users :
+            if len(user.phone) > 5 :
+                phoneList.append(user.phone)
         
     if(e1 > 0) : 
         if(device.latest_ch1_error == 0) :
