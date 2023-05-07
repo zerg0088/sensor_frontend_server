@@ -21,7 +21,6 @@ def post(user: UserCreate, db: Session = Depends(get_db)):
     
     return crud_user.create(db=db, obj_in=user)
 
-
 @router.post("/login/access-token")
 async def login_for_access_token(user: UserCreate, db: Session = Depends(get_db)):
     user = crud_user.authenticate(db=db, email=user.email, password=user.password)

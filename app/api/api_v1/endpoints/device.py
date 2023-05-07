@@ -25,8 +25,8 @@ router = APIRouter()
 @router.get("/device_list", response_model=list[DeviceRead])
 def read_devices(db: Session = Depends(get_db)) -> list[DeviceRead]:
     devices = crud_device.get_all(db)
-    json_compatible_item_data = jsonable_encoder(devices)
-    print(json_compatible_item_data)
+    # json_compatible_item_data = jsonable_encoder(devices)
+    # print(json_compatible_item_data)
     return devices
 
 # http://127.0.0.1:8000/api/v1/device_list/{}
@@ -36,7 +36,7 @@ def read_devices_by_place_id(place_id: int, db: Session = Depends(get_db)) -> li
         devices = crud_device.get_all(db)    
     else :
         devices = crud_device.get_by_place_id(db, place_id)
-    print(devices)
+    # print(devices)
     return devices
 
 @router.post("/add_device")
@@ -48,22 +48,22 @@ def add_device(device: DeviceCreate, db: Session = Depends(get_db)):
 @router.get("/value_list", response_model=list[DeviceValueRead])
 def read_device_value_list(db: Session = Depends(get_db)) -> list[DeviceValueRead]:
     device_values = crud_device_value.get_all(db)
-    json_compatible_item_data = jsonable_encoder(device_values)
-    print(json_compatible_item_data)
+    # json_compatible_item_data = jsonable_encoder(device_values)
+    # print(json_compatible_item_data)
     return device_values
 
 # http://127.0.0.1:8000/api/v1/update_data/did
 @router.get("/update_data/{did}")
 def update_data(did: int, db: Session = Depends(get_db)) :
     device_value = crud_device_value.get_by_id(db, did)
-    print(device_value)
+    # print(device_value)
     return device_value    
 
 # http://127.0.0.1:8000/api/v1/chart/did
 @router.get("/chart/{did}", response_model=list[DeviceValueRead])
 def chart(did: int, db: Session = Depends(get_db)) -> list[DeviceValueRead]:
     device_values = crud_device_value.get_chart_by_id(db, did)
-    print(device_values)
+    # print(device_values)
     return device_values
     
 # 기준 전류 셋팅. 
