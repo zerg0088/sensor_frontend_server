@@ -12,6 +12,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(User).filter(User.email == email).first()
 
+    def get_by_place(self, db: Session, place_id: int) -> list[User]:
+        return db.query(self.model).filter(self.model.place_id == place_id).all()
+    
     def create_superuser(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
@@ -28,7 +31,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_obj = User(
             email=obj_in.email,
             password=get_password_hash(obj_in.password),
-            organization = obj_in.organization,
+            phone = obj_in.phone,
             place_id = obj_in.place_id,
             is_superuser = obj_in.is_superuser
         )

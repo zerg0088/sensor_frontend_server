@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     email: EmailStr
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
-    organization: Optional[str] = ""
+    phone: Optional[str] = ""
     place_id : Optional[int] = -1
 
 

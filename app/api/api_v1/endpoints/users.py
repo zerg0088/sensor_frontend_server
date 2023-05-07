@@ -42,6 +42,11 @@ def read_user_by_id(user_id: int, current_user: User = Depends(get_current_activ
     user = crud_user.get(db, id=user_id)
     return user
 
+@router.get("/find/{place_id}", response_model=list[UserRead], response_model_exclude={"password"})
+def read_users_by_place(place_id: int, db: Session = Depends(get_db)) -> list[UserRead]:
+    users = crud_user.get_by_place(db, place_id=place_id)
+    return users
+
 
 @router.patch("/{user_id}", response_model=UserRead, response_model_exclude={"password"})
 def update_user(*, user_id: int, user_in: UserUpdate, current_user: User = Depends(get_current_active_superuser), db: Session = Depends(get_db)) -> Any:

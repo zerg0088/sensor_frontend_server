@@ -1,3 +1,6 @@
+import os
+from twilio.rest import Client
+
 from typing import Any
 
 from fastapi import APIRouter, Depends, Body, HTTPException
@@ -9,8 +12,13 @@ from app.schemas.device_value import DeviceValueRead, DeviceValueUpdate, DeviceV
 from app.api.depends import get_db
 from sqlalchemy.orm import Session
 from app.crud.device import crud_device
+from app.crud.user import crud_user
 from app.crud.device_value import crud_device_value
 from fastapi.encoders import jsonable_encoder
+
+account_sid = "AC0ea6d0032411623d41ad71b0bd680917"
+auth_token = "4f38c2627ce208f158655ec732134aac"
+client = Client(account_sid, auth_token)
 
 router = APIRouter()
 
@@ -70,11 +78,12 @@ def update_device(*, device_id: int, device_in: DeviceUpdate, db: Session = Depe
     device = crud_device.update(db, db_obj=device, obj_in=device_in)
     return device   
     
+    
 # http://127.0.0.1:8000/api/v1/insert?did=1&v1=10&v2=20
 @router.get("/insert")
 def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
                 c1 : int = None, c2 : int = None, c3 : int = None,
-                e1 : int = None, e2 : int = None, e3 : int = None,
+                e1 : int = 0, e2 : int = 0, e3 : int = 0,
                 r1 : int = None, r2 : int = None, r3 : int = None, r4 : int = None, r5 : int = None,
                 db: Session = Depends(get_db)):
     device_value = DeviceValueCreate(
@@ -84,5 +93,64 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
         e1=e1, e2=e2, e3=e3,
         r1=r1, r2=r2, r3=r3, r4=r4, r5=r5
     )
+    
+    device = crud_device.get_by_did(db, did)
+    users = crud_user.get_by_place(db, place_id=device.place_id)
+    
+    phoneList = []
+    for user in users :
+        if len(user.phone) > 5 :
+            phoneList.append(user.phone)
+        
+    if(e1 > 0) : 
+        if(device.latest_ch1_error == 0) :
+            device.latest_ch1_error = 1
+            update_data = DeviceUpdate(latest_ch1_error=1)
+            crud_device.update(db, db_obj=device, obj_in=update_data)
+            sendSms(device.name,1,phoneList)
+            print("sms fire 1")
+    else : 
+        if(device.latest_ch1_error == 1) :
+            device.latest_ch1_error = 0
+            update_data = DeviceUpdate(latest_ch1_error=0)
+            crud_device.update(db, db_obj=device, obj_in=update_data)
+            print("to zero 1")
+            
+    if(e2 > 0) : 
+        if(device.latest_ch2_error == 0) :
+            device.latest_ch2_error = 1
+            update_data = DeviceUpdate(latest_ch2_error=1)
+            crud_device.update(db, db_obj=device, obj_in=update_data)
+            sendSms(device.name,2,phoneList)
+            print("sms fire 2")
+    else : 
+        if(device.latest_ch2_error == 1) :
+            device.latest_ch2_error = 0
+            update_data = DeviceUpdate(latest_ch2_error=0)
+            crud_device.update(db, db_obj=device, obj_in=update_data)
+            print("to zero 2")      
+            
+    if(e3 > 0) : 
+        if(device.latest_ch3_error == 0) :
+            device.latest_ch3_error = 1
+            update_data = DeviceUpdate(latest_ch3_error=1)
+            crud_device.update(db, db_obj=device, obj_in=update_data)
+            sendSms(device.name,3,phoneList)
+            print("sms fire 3")
+    else : 
+        if(device.latest_ch3_error == 1) :
+            device.latest_ch3_error = 0
+            update_data = DeviceUpdate(latest_ch3_error=0)
+            crud_device.update(db, db_obj=device, obj_in=update_data)
+            print("to zero 3")                
+
     return crud_device_value.create(db=db, obj_in=device_value)
 
+def sendSms(name, ch, list) :
+    for number in list : 
+        temp = "+82" + number[1:]  
+        message = client.messages.create(
+            body= name + '디바이스 CH' + str(ch) + '에 문제가 생겼습니다.',
+            from_='+12705618731',
+            to=temp
+        )    
