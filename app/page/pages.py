@@ -20,8 +20,8 @@ router = APIRouter()
 def my_url_for(request: Request, name: str, **path_params: any) -> str:
     url = request.url_for(name, **path_params)
     parsed = list(urllib.parse.urlparse(url))
-    parsed[1] = '43.201.100.68' 
-    # parsed[1] = '127.0.0.1:8000'
+    # parsed[1] = '43.201.100.68' 
+    parsed[1] = '127.0.0.1:8000'
     return urllib.parse.urlunparse(parsed)
 
 templates = Jinja2Templates(directory="app/templates") 
@@ -32,9 +32,8 @@ async def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request}) 
 
 @router.get("/main", response_class=HTMLResponse) 
-async def main(request: Request, db: Session = Depends(get_db)): 
-    devices = crud_device.get_all(db)
-    return templates.TemplateResponse("main.html", {"request": request, "devices": devices}) 
+async def main(request: Request): 
+    return templates.TemplateResponse("main.html", {"request": request}) 
 
 @router.get("/admin", response_class=HTMLResponse) 
 async def main(request: Request, db: Session = Depends(get_db)): 

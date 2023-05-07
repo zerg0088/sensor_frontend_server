@@ -18,9 +18,6 @@
 
 <script type="text/javascript">
 
-    //var ip = "localhost:8000";
-    var ip = "43.201.100.68";
-    
     // user state 
     // ID
     var user_name = "test name";
@@ -28,21 +25,9 @@
     var org = "org";
     var auth_level = 1;
 
-    {% if user %}
-        auth_level = {{ user }};
-    {% else %}
-        auth_level = 1;
-    {% endif %}
 
-    const deviceList = [
-        {% for device in devices %}
-            {id: {{ device.id }},name: "{{ device.name }}", status: "{{ device.status }}", 
-            alert_v_rate1: {{ device.alert_v_rate1 }},alert_v_rate2: {{ device.alert_v_rate2 }},alert_v_rate3: {{ device.alert_v_rate3 }}, 
-            alert_a_rate1: {{ device.alert_a_rate1 }},alert_a_rate2: {{ device.alert_a_rate2 }},alert_a_rate3: {{ device.alert_a_rate3 }}, 
-            place_id : {{ device.place_id }}, floor : {{ device.floor }}, number : "{{ device.number }}"
-        },
-        {% endfor %}
-    ];
+    deviceList = [];
+    var intervalObject = null;
 
     function getStateColor(error) {
         if (error != 0) {
@@ -224,7 +209,7 @@
                 alert_a_rate3 : baseA3
             };
 
-            var url = 'http://'+ip+'/api/v1/device_update/' + device.id;
+            var url = '/api/v1/device_update/' + device.id;
             fetch(url,{
                 method: 'PATCH',
                 headers: {
@@ -261,7 +246,7 @@
             drawer.toggleClass('closed'); 
             
             if(drawer.hasClass('open')) {
-                var url = 'http://'+ip+'/api/v1/chart/' + device.id;
+                var url = '/api/v1/chart/' + device.id;
 
                 fetch(url).then(response => {
                     if (!response.ok) {
@@ -306,7 +291,7 @@
 
     function updateData() {
         for(const device of deviceList) { 
-            var url = 'http://'+ip+'/api/v1/update_data/' + device.id;
+            var url = '/api/v1/update_data/' + device.id;
 
             fetch(url).then(response => {
                 if (!response.ok) {
@@ -350,7 +335,7 @@
 
     function sendPlaceData() {
         var name = document.getElementById("place_name").value;
-        var url = 'http://'+ip+'/api/v1/add_place';
+        var url = '/api/v1/add_place';
 
         fetch(url,{
             method: "POST",
@@ -376,7 +361,7 @@
 
 
     function showDeviceRegisterPopup() {
-        var url = 'http://'+ip+'/api/v1/place_list';
+        var url = '/api/v1/place_list';
 
         fetch(url).then(response => {
             if (!response.ok) {
@@ -408,7 +393,7 @@
         var number = document.getElementById("device_number").value;
         var placeId = $("#device_place option:selected").val();
         
-        var url = 'http://'+ip+'/api/v1/add_device';
+        var url = '/api/v1/add_device';
         
         fetch(url,{
             method: "POST",
@@ -440,6 +425,34 @@
         hideDeviceRegisterPopup(); // 팝업 닫기
     }
 
+    function changeDeviceTable(place_id) {
+        // id == 0 -> all
+        fetch('/api/v1/device_list/' + place_id)
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error("Failed to fetch data.");
+            }
+        })
+        .then((data) => {
+            deviceList = data;
+
+            $("#table").html("");
+            for(const device of deviceList) { 
+                makeDeviceCell(device);
+            }    
+            if(intervalObject != null) {
+                clearInterval(intervalObject);
+            }
+            intervalObject = setInterval(updateData, 30000);
+            updateData();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    }
+
     $( window ).ready( function() {
         fetch("/api/v1/users/me", {
             method: "GET",
@@ -468,7 +481,38 @@
         });
 
 
-        $("#user_name").text(user_name);
+        // place list to combo box
+        fetch("/api/v1/place_list")
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error("Failed to fetch data.");
+            }
+        })
+        .then((data) => {
+            console.log(data);
+            
+            $("#place_select_combo").html("");
+            $("#place_select_combo").append('<option value="0">전체</option>');
+            for( var i = 0;i< data.length; i++) {
+                $("#place_select_combo").append('<option value="'+ data[i].id +'">' + data[i].name + '</option>');
+            }
+
+    
+        })
+        .catch((error) => {
+           
+           
+        });
+
+        $('#place_select_combo').change(function() {
+            var placeId = $("#place_select_combo option:selected").val();
+            var text = $("#place_select_combo option:selected").text();
+            $("#header-text").text(text);
+            changeDeviceTable(placeId);
+        });
+
 
         $('#device_register').click( function() {            
             showDeviceRegisterPopup();
@@ -478,16 +522,8 @@
             showPlaceRegisterPopup();
         });
 
-        
-        $("#table").html("");
-        for(const device of deviceList) { 
-            makeDeviceCell(device);
-        }
         chartInit();
-
-        setInterval(updateData, 30000);
-        updateData();
-        
+        changeDeviceTable(0);        
     });
 
 </script>
@@ -525,7 +561,9 @@
 <body>
     <header>
         <img style="margin-left:10px;" id="logo" src="https://via.placeholder.com/50x50">
-        <div id="header-text">YB 빌딩</div>
+        <div id="header-text">전체</div>
+
+        <select id="place_select_combo" style="width : 180px; margin-left:auto;margin-right: auto;"></select>
         <div id="place_register" style="margin-right: 10px; cursor: pointer;">장소등록</div>
         <div id="device_register" style="margin-right: 10px; cursor: pointer;">기기등록</div>
         <div id="user_name" style="margin-right: 10px;">test이름</div>

@@ -18,6 +18,7 @@ def post(user: UserCreate, db: Session = Depends(get_db)):
     db_user = crud_user.get_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    
     return crud_user.create(db=db, obj_in=user)
 
 

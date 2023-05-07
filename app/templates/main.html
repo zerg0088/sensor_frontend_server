@@ -15,33 +15,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<script type="text/javascript">
-
-    //var ip = "localhost:8000";
-    var ip = "43.201.100.68";
-    
-    // user state 
-    // ID
+<script type="text/javascript">    
     var user_name = "test name";
     var user_email = "test@test.com";
     var org = "org";
-    var auth_level = 1;
 
-    {% if user %}
-        auth_level = {{ user }};
-    {% else %}
-        auth_level = 1;
-    {% endif %}
-
-    const deviceList = [
-        {% for device in devices %}
-            {id: {{ device.id }},name: "{{ device.name }}", status: "{{ device.status }}", 
-            alert_v_rate1: {{ device.alert_v_rate1 }},alert_v_rate2: {{ device.alert_v_rate2 }},alert_v_rate3: {{ device.alert_v_rate3 }}, 
-            alert_a_rate1: {{ device.alert_a_rate1 }},alert_a_rate2: {{ device.alert_a_rate2 }},alert_a_rate3: {{ device.alert_a_rate3 }}, 
-            place_id : {{ device.place_id }}, floor : {{ device.floor }}, number : "{{ device.number }}"
-        },
-        {% endfor %}
-    ];
+    deviceList = [];
 
     function getStateColor(error) {
         if (error != 0) {
@@ -215,7 +194,7 @@
             drawer.toggleClass('closed'); 
             
             if(drawer.hasClass('open')) {
-                var url = 'http://'+ip+'/api/v1/chart/' + device.id;
+                var url = '/api/v1/chart/' + device.id;
 
                 fetch(url).then(response => {
                     if (!response.ok) {
@@ -260,7 +239,7 @@
 
     function updateData() {
         for(const device of deviceList) { 
-            var url = 'http://'+ip+'/api/v1/update_data/' + device.id;
+            var url = '/api/v1/update_data/' + device.id;
 
             fetch(url).then(response => {
                 if (!response.ok) {
@@ -295,44 +274,56 @@
         //${device.id}_1_v
     }
     $( window ).ready( function() {
+
         fetch("/api/v1/users/me", {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("access_token"),
             },
         })
-        .then((response) => {
+        .then(response => {
             if (response.ok) {
                 return response.json();
             } else {
                 throw new Error("Failed to fetch data.");
             }
         })
-        .then((json) => {
-            //alert(json);
-            console.log(json);
+        .then(json => {
             $("#user_name").text(json.email);
+            var place_id = json.place_id;
+            //http://127.0.0.1:8000/api/v1/device_list/2
+
+            return Promise.all([
+                fetch('/api/v1/device_list/' + place_id),
+                fetch('/api/v1/place_name/' + place_id)
+            ]);
+
         })
-        .catch((error) => {
-            alert("잘못된 접근입니다.");
-            window.location.href = '/login';
+        .then(responses => {
+            responses[0].json().then(data => {
+                deviceList = data;
+
+                $("#table").html("");
+                for(const device of deviceList) { 
+                    makeDeviceCell(device);
+                }    
+                setInterval(updateData, 30000);
+                updateData();
+            }).catch(error => {
+             
+            });
+
+            responses[1].json().then(data => {
+                $("#header-text").text(data.name);
+            }).catch(error => {
+                
+            });
+        })
+        .catch(error => {
+            console.log(error);
         });
 
-
-        $("#user_name").text(user_name);
-
-        $('#device_register').click( function() {            
-            alert("device register");
-        });
-        $("#table").html("");
-        for(const device of deviceList) { 
-            makeDeviceCell(device);
-        }
-        chartInit();
-
-        setInterval(updateData, 30000);
-        updateData();
-        
+        chartInit();        
     });
 
 </script>
@@ -340,7 +331,7 @@
 <body>
     <header>
         <img style="margin-left:10px;" id="logo" src="https://via.placeholder.com/50x50">
-        <div id="header-text">YB 빌딩</div>
+        <div id="header-text"></div>
         <div id="user_name" style="margin-right: 10px;">test이름</div>
     </header>
     <table>

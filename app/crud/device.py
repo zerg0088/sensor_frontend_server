@@ -12,6 +12,10 @@ from sqlalchemy import Column, Integer, String, Boolean
 class CRUDDevice(CRUDBase[Device, DeviceCreate, DeviceUpdate]):
     def get_all2(self, db: Session) -> list[Device]:
         return db.query(Device).all()
+    
+    def get_by_place_id(self, db: Session, place_id: int) -> list[Device]:
+        return db.query(self.model).filter(self.model.place_id == place_id).all()
+    
     # def get_by_id(self, db: Session, *, id: Integer) -> Optional[Device]:
     #     return db.query(Device).filter(Device.id == id).first()
     

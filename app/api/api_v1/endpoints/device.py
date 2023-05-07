@@ -21,6 +21,16 @@ def read_devices(db: Session = Depends(get_db)) -> list[DeviceRead]:
     print(json_compatible_item_data)
     return devices
 
+# http://127.0.0.1:8000/api/v1/device_list/{}
+@router.get("/device_list/{place_id}", response_model=list[DeviceRead])
+def read_devices_by_place_id(place_id: int, db: Session = Depends(get_db)) -> list[DeviceRead]:
+    if place_id == 0 : 
+        devices = crud_device.get_all(db)    
+    else :
+        devices = crud_device.get_by_place_id(db, place_id)
+    print(devices)
+    return devices
+
 @router.post("/add_device")
 def add_device(device: DeviceCreate, db: Session = Depends(get_db)):
     return crud_device.create(db=db, obj_in=device)
@@ -49,7 +59,7 @@ def chart(did: int, db: Session = Depends(get_db)) -> list[DeviceValueRead]:
     return device_values
     
 # 기준 전류 셋팅. 
-@router.patch("device_update/{device_id}", response_model=DeviceRead)
+@router.patch("/device_update/{device_id}", response_model=DeviceRead)
 def update_device(*, device_id: int, device_in: DeviceUpdate, db: Session = Depends(get_db)) -> Any:
     device = crud_device.get(db, id=device_id)
     if not device:

@@ -12,6 +12,9 @@ class DeviceBase(BaseModel):
     alert_a_rate1: Optional[float] = 0.0
     alert_a_rate2: Optional[float] = 0.0
     alert_a_rate3: Optional[float] = 0.0
+    latest_ch1_error : Optional[bool] = False
+    latest_ch2_error : Optional[bool] = False
+    latest_ch3_error : Optional[bool] = False
     place_id : int = 0
     floor: Optional[int] = 0
     number: Optional[str] = ""

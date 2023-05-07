@@ -9,8 +9,9 @@ from app.schemas.place import PlaceCreate, PlaceUpdate
 from sqlalchemy import Column, Integer, String, Boolean
 
 class CRUDPlace(CRUDBase[Place, PlaceCreate, PlaceUpdate]):
-    def get_all2(self, db: Session) -> list[Place]:
-        return db.query(Place).all()
+    
+    def get_by_id(self, db: Session, place_id: int) -> Place:
+        return db.query(self.model).filter(self.model.id == place_id).first()
     # def get_by_id(self, db: Session, *, id: Integer) -> Optional[Device]:
     #     return db.query(Device).filter(Device.id == id).first()
     

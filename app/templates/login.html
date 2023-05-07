@@ -23,8 +23,8 @@
             var id = $("#username").val();
             var pass = $("#password").val();
             var jsonData = {
-                "email": "admin@test.com", 
-                "password": "1234",
+                "email": id, 
+                "password": pass,
             }; 
 
             fetch("/api/v1/login/access-token", {
