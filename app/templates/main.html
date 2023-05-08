@@ -149,7 +149,7 @@
     function makeDeviceCell(device) {
         var cell = 
         `<tr>
-            <td rowspan='3'><div><div>${device.floor}층 - ${device.number}</div><button style="margin-top:10px" id="graph_button_${device.id}" type="submit" class="btn btn-primary">그래프 보기</button></div></td>
+            <td rowspan='3'><div><div>${device.name}</div><button style="margin-top:10px" id="graph_button_${device.id}" type="submit" class="btn btn-primary">그래프 보기</button></div></td>
             <td id="${device.id}_1_state">🟢</td>
             <td>CH1</td>
             <td id="${device.id}_1_v"></td>

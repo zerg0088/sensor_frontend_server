@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     DATABASE: str = os.getenv('DATABASE')
     FIRST_SUPERUSER_EMAIL: EmailStr = os.getenv('FIRST_SUPERUSER_EMAIL')
     FIRST_SUPERUSER_PASSWORD: str = os.getenv('FIRST_SUPERUSER_PASSWORD')
+    SMS_SID: str = os.getenv('SMS_SID')
+    SMS_AUTH_TOKEN: str = os.getenv('SMS_AUTH_TOKEN')
+    
+    PHONE: str = os.getenv('PHONE')
     SQLALCHEMY_DATABASE_URL = f'mysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
 
     class Config:

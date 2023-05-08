@@ -15,11 +15,9 @@ from app.crud.device import crud_device
 from app.crud.user import crud_user
 from app.crud.device_value import crud_device_value
 from fastapi.encoders import jsonable_encoder
+from app.core.config import settings
 
-account_sid = "AC0ea6d0032411623d41ad71b0bd680917"
-auth_token = "4f38c2627ce208f158655ec732134aac"
-client = Client(account_sid, auth_token)
-
+client = Client(settings.SMS_SID, settings.SMS_AUTH_TOKEN)
 router = APIRouter()
 
 @router.get("/device_list", response_model=list[DeviceRead])
@@ -99,19 +97,25 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
         return 'device 없음'
         
     users = crud_user.get_by_place(db, place_id=device.place_id)
+    admins = crud_user.get_superuser(db)
     
-    phoneList = []
+    phoneSet = set()
     if users != None :
         for user in users :
             if len(user.phone) > 5 :
-                phoneList.append(user.phone)
+                phoneSet.add(user.phone)
+                
+    if admins != None :
+        for user in admins :
+            if len(user.phone) > 5 :
+                phoneSet.add(user.phone)
         
     if(e1 > 0) : 
         if(device.latest_ch1_error == 0) :
             device.latest_ch1_error = 1
             update_data = DeviceUpdate(latest_ch1_error=1)
             crud_device.update(db, db_obj=device, obj_in=update_data)
-            sendSms(device.name,1,phoneList)
+            sendSms(device.name,1,list(phoneSet))
             print("sms fire 1")
     else : 
         if(device.latest_ch1_error == 1) :
@@ -125,7 +129,7 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
             device.latest_ch2_error = 1
             update_data = DeviceUpdate(latest_ch2_error=1)
             crud_device.update(db, db_obj=device, obj_in=update_data)
-            sendSms(device.name,2,phoneList)
+            sendSms(device.name,2,list(phoneSet))
             print("sms fire 2")
     else : 
         if(device.latest_ch2_error == 1) :
@@ -139,7 +143,7 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
             device.latest_ch3_error = 1
             update_data = DeviceUpdate(latest_ch3_error=1)
             crud_device.update(db, db_obj=device, obj_in=update_data)
-            sendSms(device.name,3,phoneList)
+            sendSms(device.name,3,list(phoneSet))
             print("sms fire 3")
     else : 
         if(device.latest_ch3_error == 1) :
@@ -153,6 +157,7 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
 def sendSms(name, ch, list) :
     for number in list : 
         temp = "+82" + number[1:]  
+        print(temp)
         message = client.messages.create(
             body= name + '디바이스 CH' + str(ch) + '에 문제가 생겼습니다.',
             from_='+12705618731',

@@ -15,6 +15,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_place(self, db: Session, place_id: int) -> list[User]:
         return db.query(self.model).filter(self.model.place_id == place_id).all()
     
+    def get_superuser(self, db: Session) -> list[User]:
+        return db.query(self.model).filter(self.model.is_superuser).all()
+    
     def create_superuser(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
