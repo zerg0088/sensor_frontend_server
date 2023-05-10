@@ -13,6 +13,7 @@ from app.api.depends import get_db
 from sqlalchemy.orm import Session
 from app.crud.device import crud_device
 from app.crud.user import crud_user
+from app.crud.place import crud_place
 from app.crud.device_value import crud_device_value
 from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
@@ -92,10 +93,12 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
         r1=r1, r2=r2, r3=r3, r4=r4, r5=r5
     )
     
+    
     device = crud_device.get_by_did(db, did)
     if device == None : 
         return 'device 없음'
-        
+    
+    place = crud_place.get_by_id(db, device.place_id).name
     users = crud_user.get_by_place(db, place_id=device.place_id)
     admins = crud_user.get_superuser(db)
     
@@ -115,7 +118,7 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
             device.latest_ch1_error = 1
             update_data = DeviceUpdate(latest_ch1_error=1)
             crud_device.update(db, db_obj=device, obj_in=update_data)
-            sendSms(device.name,1,list(phoneSet))
+            sendSms(place, device.name,1,list(phoneSet))
             print("sms fire 1")
     else : 
         if(device.latest_ch1_error == 1) :
@@ -129,7 +132,7 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
             device.latest_ch2_error = 1
             update_data = DeviceUpdate(latest_ch2_error=1)
             crud_device.update(db, db_obj=device, obj_in=update_data)
-            sendSms(device.name,2,list(phoneSet))
+            sendSms(place, device.name,2,list(phoneSet))
             print("sms fire 2")
     else : 
         if(device.latest_ch2_error == 1) :
@@ -143,7 +146,7 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
             device.latest_ch3_error = 1
             update_data = DeviceUpdate(latest_ch3_error=1)
             crud_device.update(db, db_obj=device, obj_in=update_data)
-            sendSms(device.name,3,list(phoneSet))
+            sendSms(place, device.name,3,list(phoneSet))
             print("sms fire 3")
     else : 
         if(device.latest_ch3_error == 1) :
@@ -154,12 +157,12 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
 
     return crud_device_value.create(db=db, obj_in=device_value)
 
-def sendSms(name, ch, list) :
+def sendSms(position, name, ch, list) :
     for number in list : 
         temp = "+82" + number[1:]  
         print(temp)
         message = client.messages.create(
-            body= name + '디바이스 CH' + str(ch) + '에 문제가 생겼습니다.',
+            body= position + ' ' + name + '고전압기' + str(ch) + '에 문제가 발생하셨습니다.',
             from_='+12705618731',
             to=temp
         )    
