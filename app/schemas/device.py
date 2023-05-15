@@ -29,6 +29,8 @@ class DeviceUpdate(DeviceBase):
     pass
     # password: Optional[str] = None
 
+class DeviceRemove(DeviceBase):
+    pass
 
 class DeviceInDBBase(DeviceBase):
     # id: int

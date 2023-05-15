@@ -38,15 +38,16 @@
     }
 
     function getCleanStateColor(base, current) {
-        if (base > current) {
+        var value = base - 1500;
+        if(value < 0) value = 0;
+        
+        if (value > current) {
             return "🟠";
         } else {
             return "🟢";
         }
     }
 
-
-    var chartDateArray = [];
     var lineChartV;
     var lineChartA;
 
@@ -59,15 +60,18 @@
                 datasets: [{
                     label: 'CH1',
                     data: [],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 1,
                 },{
                     label: 'CH2',
                     data: [],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 1,
                 },{
                     label: 'CH3',
                     data: [],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 1,
                 }]
             },
             options: {
@@ -76,13 +80,7 @@
                     legend: {
                         align: 'start'
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return chartDateArray[context.dataIndex];
-                            }
-                        }
-                    }
+                    
                 },
                 scales: {
                     y: {
@@ -99,19 +97,22 @@
         lineChartA = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [],
+                labels: [], // bootom label
                 datasets: [{
                     label: 'CH1',
                     data: [],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 1,
                 },{
                     label: 'CH2',
                     data: [],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 1,
                 },{
                     label: 'CH3',
                     data: [],
-                    borderWidth: 1
+                    borderWidth: 1,
+                    pointRadius: 1,
                 }]
             },
             options: {
@@ -120,13 +121,7 @@
                     legend: {
                         align: 'start'
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return chartDateArray[context.dataIndex];
-                            }
-                        }
-                    }
+                    
                 },
                 scales: {
                     y: {
@@ -140,9 +135,9 @@
         });
     }
 
-    function drawLineChart(chart, array1, array2, array3) {
-        //console.log(lineChartV1);
-        chart.data.labels = array1;
+    function drawLineChart(chart, dateList, array1, array2, array3) {
+
+        chart.data.labels = dateList;
         chart.data.datasets[0].data = array1;
         chart.data.datasets[1].data = array2;
         chart.data.datasets[2].data = array3;
@@ -171,6 +166,9 @@
                 </div> -->
                 <div>
                     <button id="a_button_${device.id}" type="submit" class="btn btn-primary">기준전류 셋팅</button>
+                </div>
+                <div>
+                    <button id="delete_button_${device.id}" type="submit" class="btn btn-primary delete_button" style="margin-top:10px">디바이스 삭제</button>
                 </div>
             
             </td>
@@ -240,6 +238,28 @@
             });
         });
 
+
+        $("#delete_button_" + device.id).click( function() {    
+            
+            fetch(`/api/v1/remove_device/${device.id}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Device deleted:', data);
+
+                // list delete
+                var index = $('.delete_button').index(this);
+                for(var i = 0;i < 3 ;i++) {
+                    console.log((index * 3 + i));
+                    $('#table tr').eq(index * 3).remove();
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting device:', error);
+            });
+        });
+
         $("#graph_button_" + device.id).click( function() {
             const drawer = $('#drawer');
             drawer.toggleClass('open');
@@ -277,8 +297,25 @@
                         chartDateArray.unshift(list[i].timestamp != null ? list[i].timestamp : 0);
                     }
 
-                    drawLineChart(lineChartV, v1Array,v2Array,v3Array);
-                    drawLineChart(lineChartA, a1Array,a2Array,a3Array);
+                    var localDateList = chartDateArray.map(it => {
+                        const inputDate = new Date(it);
+                        const addedHours = 9;
+                        inputDate.setHours(inputDate.getHours() + addedHours);
+
+                        const year = inputDate.getFullYear();
+                        const month = String(inputDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(inputDate.getDate()).padStart(2, '0');
+                        const hours = String(inputDate.getHours() + addedHours).padStart(2, '0');
+                        const minutes = String(inputDate.getMinutes()).padStart(2, '0');
+                        const seconds = String(inputDate.getSeconds()).padStart(2, '0');
+                        
+                        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    
+                        return formattedDate;
+                    });
+
+                    drawLineChart(lineChartV, localDateList, v1Array.map(it => it/1000), v2Array.map(it => it/1000), v3Array.map(it => it/1000));
+                    drawLineChart(lineChartA, localDateList, a1Array.map(it => it/1000), a2Array.map(it => it/1000), a3Array.map(it => it/1000));
                     
                 }).catch(error => {
                     console.log(error);
@@ -326,37 +363,69 @@
     }
 
     // popup function
-    function showPlaceRegisterPopup() {
-        document.getElementById("place_popup").style.display = "block";
+    function showUserRegisterPopup() {
+        document.getElementById("user_popup").style.display = "block";
+
+        document.getElementById("id_field").value = "";
+        document.getElementById("pw_field").value = "";
+        document.getElementById("place_field").value = "";
     }
-    function hidePlaceRegisterPopup() {
-        document.getElementById("place_popup").style.display = "none";
+    function hideUserRegisterPopup() {
+        document.getElementById("user_popup").style.display = "none";
     }
 
-    function sendPlaceData() {
-        var name = document.getElementById("place_name").value;
-        var url = '/api/v1/add_place';
+    function sendUserData() {
+        var id = document.getElementById("id_field").value;
+        var pw = document.getElementById("pw_field").value;
+        var placeName = document.getElementById("place_field").value;
 
-        fetch(url,{
+        var userUrl = '/api/v1/register';
+        var placeUrl = '/api/v1/add_place';
+
+        fetch(placeUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                name: name
+              name: placeName
             }),
         }).then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             return response.json();
+        }).then(data => {      
+
+            console.log(data.id);
+            console.log(id);
+            console.log(pw);
+
+            return fetch(userUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email : id,
+                    password : pw,
+                    place_id : data.id, 
+                    //phone : phone.split(','),
+                    is_superuser : false
+                }),
+            });
+        }).then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
         }).then(data => {
-            alert("장소등록 했습니다.");
+            alert("계정등록이 완료됐습니다.")
         }).catch(error => {
             console.log(error);
-        });
+        });        
 
-        hidePlaceRegisterPopup(); // 팝업 닫기
+        hideUserRegisterPopup(); // 팝업 닫기
     }
 
 
@@ -454,10 +523,18 @@
     }
 
     $( window ).ready( function() {
+        const accessToken = localStorage.getItem('access_token');
+        const hasAccessToken = accessToken !== null;
+        
+        if (!hasAccessToken) {
+            alert("접근 권한이 없습니다.");
+            window.location.href = '/login';
+        }
+
         fetch("/api/v1/users/me", {
             method: "GET",
             headers: {
-                "Authorization": "Bearer " + localStorage.getItem("access_token"),
+                "Authorization": "Bearer " + accessToken,
             },
         })
         .then((response) => {
@@ -479,7 +556,6 @@
             alert("잘못된 접근입니다.");
             window.location.href = '/login';
         });
-
 
         // place list to combo box
         fetch("/api/v1/place_list")
@@ -518,8 +594,13 @@
             showDeviceRegisterPopup();
         });
 
-        $('#place_register').click( function() {            
-            showPlaceRegisterPopup();
+        $('#user_register').click( function() {            
+            showUserRegisterPopup();
+        });
+
+        $('#logout_button').click( function() {         
+            localStorage.removeItem('access_token');   
+            window.location.href = "/login";
         });
 
         chartInit();
@@ -560,13 +641,14 @@
 
 <body>
     <header>
-        <img style="margin-left:10px;" id="logo" src="https://via.placeholder.com/50x50">
+        <img style="margin-left:10px;" id="logo" src="{{ my_url_for(request, 'static', path='/images/logo.png')}}">
         <div id="header-text">전체</div>
 
         <select id="place_select_combo" style="width : 180px; margin-left:auto;margin-right: auto;"></select>
-        <div id="place_register" style="margin-right: 10px; cursor: pointer;">장소등록</div>
+        <div id="user_register" style="margin-right: 10px; cursor: pointer;">유저등록</div>
         <div id="device_register" style="margin-right: 10px; cursor: pointer;">기기등록</div>
         <div id="user_name" style="margin-right: 10px;">test이름</div>
+        <div id="logout_button" style="margin-right: 10px; cursor: pointer;">로그아웃</div>
     </header>
 
     <table>
@@ -600,16 +682,25 @@
         </div>
     </div>
 
-    <div class="popup" id="place_popup">
+    <div class="popup" id="user_popup">
 		<div class="popup-content">
-			<!-- 팝업 내용 -->
             <div>
-                <span style="display:inline">위치 이름 :</span>
-			    <input style="display:inline; width : auto" type="text" id="place_name">
+                <span class="user_popup_label">ID :</span>
+			    <input class="user_popup_field" type="text" id="id_field">
             </div>
-			<div style="margin-top: 30px;">
-                <button onclick="sendPlaceData()">추가</button>
-			    <button onclick="hidePlaceRegisterPopup()">닫기</button>
+
+            <div style="margin-top: 10px;">
+                <span class="user_popup_label">PW :</span>
+			    <input class="user_popup_field" type="text" id="pw_field">
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <span class="user_popup_label">장소 이름 :</span>
+			    <input class="user_popup_field" type="text" id="place_field">
+            </div>
+			<div style="margin-top: 15px;">
+                <button onclick="sendUserData()">추가</button>
+			    <button onclick="hideUserRegisterPopup()">닫기</button>
             </div>
 			
 		</div>
@@ -630,46 +721,17 @@
                     <input class="popup_input" style="display:inline; width : auto" type="text" id="device_name" value="-1">
                 </div>
             </div>
-            
-            <!-- <div style="display: flex; flex-direction: row;">
-                <div>
-                    <span style="display:inline">CH1 기준전류 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type=number step=0.01 id="device_a1_rate" value="-1">
-                </div>
-                <div style="margin-left:10px">
-                    <span style="display:inline">CH2 기준전류 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type=number step=0.01 id="device_a2_rate"value="-1">
-                </div>
-            </div> -->
 
             <div style="display: flex; flex-direction: row;">
-                <!-- <div>
-                    <span style="display:inline">CH3 기준전류 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type=number step=0.01 id="device_a3_rate"value="-1">
-                </div> -->
+               
                 <div>
                     <span style="display:block;">디바이스 위치 :</span>
                     <div style="display:block; margin-left:0px;padding:0px" class="container">
-                        <select id="device_place" style="width : 180px">
-                            <!-- <option value="option-1">Option 1</option>
-                            <option value="option-2">Option 2</option>
-                            <option value="option-3">Option 3</option> -->
-                        </select>
+                        <select id="device_place" style="width : 180px"></select>
                     </div>
                 </div>
                 
             </div>
-
-            <!-- <div style="display: flex; flex-direction: row;">
-                <div>
-                    <span style="display:inline">층 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type="number" id="device_floor" value="-1">
-                </div>
-                <div style="margin-left:10px">
-                    <span style="display:inline">공조기 번호 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_number" value="-1">
-                </div>
-            </div> -->
             
 			<div style="margin-top: 30px;">
                 <button onclick="sendDeviceData()">추가</button>

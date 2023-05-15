@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
 
 from app.models.device import Device
-from app.schemas.device import DeviceRead, DeviceUpdate, DeviceCreate
+from app.schemas.device import DeviceRead, DeviceUpdate, DeviceCreate, DeviceRemove
 from app.schemas.device_value import DeviceValueRead, DeviceValueUpdate, DeviceValueCreate
 from app.api.depends import get_db
 from sqlalchemy.orm import Session
@@ -38,10 +38,20 @@ def read_devices_by_place_id(place_id: int, db: Session = Depends(get_db)) -> li
     # print(devices)
     return devices
 
+@router.delete("/remove_device/{device_id}")
+def delete_device(device_id: int, db: Session = Depends(get_db)):
+    print(device_id)
+    device = crud_device.get(db=db, id=device_id)
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    crud_device_value.remove_by_did(db, did=device_id) 
+    crud_device.remove(db=db, id=device_id)
+    return {"message": "Device deleted"}
+
 @router.post("/add_device")
 def add_device(device: DeviceCreate, db: Session = Depends(get_db)):
     return crud_device.create(db=db, obj_in=device)
-
 
 # http://127.0.0.1:8000/api/v1/value_list
 @router.get("/value_list", response_model=list[DeviceValueRead])
@@ -93,25 +103,25 @@ def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
         r1=r1, r2=r2, r3=r3, r4=r4, r5=r5
     )
     
-    
     device = crud_device.get_by_did(db, did)
     if device == None : 
         return 'device 없음'
     
     place = crud_place.get_by_id(db, device.place_id).name
-    users = crud_user.get_by_place(db, place_id=device.place_id)
-    admins = crud_user.get_superuser(db)
-    
+    users = crud_user.get_by_place(db, place_id=device.place_id) # phones
+    admins = crud_user.get_superuser(db) # phone 
     phoneSet = set()
     if users != None :
         for user in users :
-            if len(user.phone) > 5 :
-                phoneSet.add(user.phone)
+            for phone in user.phone :
+                if len(phone) > 5 :
+                    phoneSet.add(phone)
                 
     if admins != None :
         for user in admins :
-            if len(user.phone) > 5 :
-                phoneSet.add(user.phone)
+            for phone in user.phone :
+                if len(phone) > 5 :
+                    phoneSet.add(phone)
         
     if(e1 > 0) : 
         if(device.latest_ch1_error == 0) :
@@ -162,7 +172,7 @@ def sendSms(position, name, ch, list) :
         temp = "+82" + number[1:]  
         print(temp)
         message = client.messages.create(
-            body= position + ' ' + name + '고전압기' + str(ch) + '에 문제가 발생하셨습니다.',
+            body= position + ' ' + name + '고전압기 CH.' + str(ch) + '에 문제가 발생하였습니다.',
             from_='+12705618731',
             to=temp
         )    

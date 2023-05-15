@@ -20,7 +20,7 @@ def read_user_me(current_user: User = Depends(get_current_active_user)) -> UserR
 
 
 @router.patch('/me', response_model=UserRead, response_model_exclude={"password"})
-def update_user_me(*, db: Session = Depends(get_db), password: str = Body(None), email: EmailStr = Body(None), current_user: User = Depends(get_current_active_user)):
+def update_user_me(*, db: Session = Depends(get_db), password: str = Body(None), email: str = Body(None), current_user: User = Depends(get_current_active_user)):
     current_user_data = jsonable_encoder(current_user)
     user_in = UserUpdate(**current_user_data)
     if password:
@@ -50,6 +50,18 @@ def read_users_by_place(place_id: int, db: Session = Depends(get_db)) -> list[Us
 
 @router.patch("/{user_id}", response_model=UserRead, response_model_exclude={"password"})
 def update_user(*, user_id: int, user_in: UserUpdate, current_user: User = Depends(get_current_active_superuser), db: Session = Depends(get_db)) -> Any:
+    user = crud_user.get(db, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user with this user id does not exist in the system",
+        )
+    user = crud_user.update(db, db_obj=user, obj_in=user_in)
+    return user
+
+
+@router.patch("/update_phone/{user_id}", response_model=UserRead, response_model_exclude={"password", "email"})
+def update_phone(*, user_id: int, user_in: UserUpdate, db: Session = Depends(get_db)) -> Any:
     user = crud_user.get(db, id=user_id)
     if not user:
         raise HTTPException(

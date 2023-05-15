@@ -13,10 +13,16 @@ class CRUDDeviceValue(CRUDBase[DeviceValue, DeviceValueCreate, DeviceValueUpdate
         return db.query(self.model).filter(self.model.did == did).order_by(self.model.timestamp.desc()).first()
     
     def get_chart_by_id(self, db: Session, did: int) -> list[DeviceValue]:
-        return db.query(self.model.v1,self.model.v2,self.model.v3,self.model.c1,self.model.c2,self.model.c3,self.model.timestamp).filter(self.model.did == did).order_by(self.model.timestamp.desc()).limit(300).all()
+        return db.query(self.model.v1,self.model.v2,self.model.v3,self.model.c1,self.model.c2,self.model.c3,self.model.timestamp).filter(self.model.did == did).order_by(self.model.timestamp.desc()).limit(150).all()
     
     def get_all2(self, db: Session) -> list[DeviceValue]:
         return db.query(DeviceValue).all()
+    
+    def remove_by_did(self, db: Session, did: int):
+        db.query(self.model).filter_by(did=did).delete()
+        db.commit()
+        return True
+
     # def get_by_id(self, db: Session, *, id: Integer) -> Optional[Device]:
     #     return db.query(Device).filter(Device.id == id).first()
     

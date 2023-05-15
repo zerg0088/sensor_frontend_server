@@ -1,10 +1,11 @@
 import os
+from typing import List
+import json
 
 from dotenv import load_dotenv
 from pydantic import BaseSettings, EmailStr
 
 load_dotenv()
-
 
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
@@ -19,12 +20,12 @@ class Settings(BaseSettings):
     USERNAME: str = os.getenv('USERNAME')
     PASSWORD: str = os.getenv('PASSWORD')
     DATABASE: str = os.getenv('DATABASE')
-    FIRST_SUPERUSER_EMAIL: EmailStr = os.getenv('FIRST_SUPERUSER_EMAIL')
+    FIRST_SUPERUSER_EMAIL: str = os.getenv('FIRST_SUPERUSER_EMAIL')
     FIRST_SUPERUSER_PASSWORD: str = os.getenv('FIRST_SUPERUSER_PASSWORD')
     SMS_SID: str = os.getenv('SMS_SID')
     SMS_AUTH_TOKEN: str = os.getenv('SMS_AUTH_TOKEN')
     
-    PHONE: str = os.getenv('PHONE')
+    PHONE: List[str] = json.loads(os.getenv('PHONE'))
     SQLALCHEMY_DATABASE_URL = f'mysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
 
     class Config:
