@@ -149,8 +149,7 @@
             <td id="${device.id}_1_v"></td>
             <!-- <td><input type="number" name="edittext" id="${device.id}_1_bv" value="${device.alert_v_rate1}"> kV</td> -->
             <td id="${device.id}_1_a"></td>
-            <td>${device.alert_a_rate1}mA</td>
-
+            
             <td id="${device.id}_1_clean_state">🟢</td>
             <td rowspan='3'></td>
             <td rowspan='3'></td>
@@ -163,7 +162,6 @@
             <td id="${device.id}_2_v"></td>
             <!-- <td><input type="number" name="edittext" id="${device.id}_2_bv" value="${device.alert_v_rate2}"> kV</td> -->
             <td id="${device.id}_2_a"></td>
-            <td>${device.alert_a_rate2}mA</td>
 
             <td id="${device.id}_2_clean_state">🟢</td>
             
@@ -174,7 +172,6 @@
             <td id="${device.id}_3_v"></td>
             <!-- <td><input type="number" name="edittext" id="${device.id}_3_bv" value="${device.alert_v_rate3}"> kV</td> -->
             <td id="${device.id}_3_a"></td>
-            <td>${device.alert_a_rate3}mA</td>
 
             <td id="${device.id}_3_clean_state">🟢</td>
             
@@ -421,7 +418,7 @@
             alert("잘못된 형식의 번호 입니다.");
             return;
         }
-        
+
         if (item) {
             var itemContainer = $('<div>').addClass('item');
             var itemName = $('<span>').text(item);
@@ -453,6 +450,7 @@
         });
        
         $('#phone_edit').click(function() {
+            $('#list').html("");
             var listItems = $('#list').html();
             $('.popup').fadeIn();
 
@@ -606,7 +604,6 @@
                 <th>체널</th>
                 <th>전압</th>
                 <th>전류</th>
-                <th>기준전류</th>
                 <th>청소</th>
                 <th>온도</th>
                 <th>습도</th>
