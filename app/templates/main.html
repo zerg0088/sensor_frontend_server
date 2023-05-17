@@ -407,14 +407,26 @@
         });
     }
 
+    function isHpFormat(hp){
+        if(hp == ""){
+            return false;
+        }
+        var phoneRule = /^(01[016789]{1})[0-9]{4}[0-9]{4}$/;
+        return phoneRule.test(hp);
+    }
+
     function addPhoneButtonClick() {
         var item = $('#itemInput').val();
-
+        if(!isHpFormat(item)) {
+            alert("잘못된 형식의 번호 입니다.");
+            return;
+        }
+        
         if (item) {
             var itemContainer = $('<div>').addClass('item');
             var itemName = $('<span>').text(item);
             var removeBtn = $('<button>').text('-');
-            
+                
             // phone 리스트 업데이트.
             addPhoneRequest(userId, item);
             removeBtn.click(function() {
