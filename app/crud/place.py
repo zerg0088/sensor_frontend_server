@@ -12,6 +12,9 @@ class CRUDPlace(CRUDBase[Place, PlaceCreate, PlaceUpdate]):
     
     def get_by_id(self, db: Session, place_id: int) -> Place:
         return db.query(self.model).filter(self.model.id == place_id).first()
+    
+    def get_by_name(self, db: Session, place_name: str) -> Place:
+        return db.query(self.model).filter(self.model.name == place_name).first()
     # def get_by_id(self, db: Session, *, id: Integer) -> Optional[Device]:
     #     return db.query(Device).filter(Device.id == id).first()
     

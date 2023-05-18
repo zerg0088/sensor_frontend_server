@@ -18,6 +18,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_superuser(self, db: Session) -> list[User]:
         return db.query(self.model).filter(self.model.is_superuser).all()
     
+    def delete_by_placeid(self, db: Session, place_id: int) -> int :
+        db.query(self.model).filter_by(place_id=place_id).delete()
+        db.commit()
+        return True
+
+    
     def create_superuser(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,

@@ -370,18 +370,72 @@
         document.getElementById("pw_field").value = "";
         document.getElementById("place_field").value = "";
     }
+
     function hideUserRegisterPopup() {
         document.getElementById("user_popup").style.display = "none";
     }
 
-    function sendUserData() {
+    async function hasPlaceInServer(name) {
+        var url = '/api/v1/place_name/' + name;
+        try {
+            const response = await fetch(url, { method: "GET" });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            if (data == null) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async function hasUserInServer(name) {
+        var url = '/api/v1/users/name/' + name;
+
+        try {
+            const response = await fetch(url, { method: "GET" });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            if (data == null) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async function sendUserData() {
         var id = document.getElementById("id_field").value;
         var pw = document.getElementById("pw_field").value;
         var placeName = document.getElementById("place_field").value;
 
         var userUrl = '/api/v1/register';
         var placeUrl = '/api/v1/add_place';
+        
+        var userExists = await hasUserInServer(id);
+        if (userExists) {
+            alert("중복된 ID가 있습니다.");
+            return;
+        }
 
+        var placeExists = await hasPlaceInServer(placeName);
+        if(placeExists) {
+            alert("중복된 장소가 있습니다.");
+            return;
+        }
+        
         fetch(placeUrl, {
             method: "POST",
             headers: {
@@ -574,8 +628,6 @@
             for( var i = 0;i< data.length; i++) {
                 $("#place_select_combo").append('<option value="'+ data[i].id +'">' + data[i].name + '</option>');
             }
-
-    
         })
         .catch((error) => {
            
@@ -583,8 +635,16 @@
         });
 
         $('#place_select_combo').change(function() {
+            var selectedIndex = $("#place_select_combo option:selected").index();
             var placeId = $("#place_select_combo option:selected").val();
             var text = $("#place_select_combo option:selected").text();
+            
+            if(selectedIndex != 0) {
+                $("#delete_place").show();
+            } else {
+                $("#delete_place").hide();
+            }
+        
             $("#header-text").text(text);
             changeDeviceTable(placeId);
         });
@@ -603,8 +663,33 @@
             window.location.href = "/login";
         });
 
+        $("#delete_place").click( function() {         
+            var result = confirm('"' + $("#header-text").text() + '" 를 삭제하시겠습니까?');
+            var placeId = $("#place_select_combo option:selected").val();
+
+            if (result) {
+
+                //## http://127.0.0.1:8000/api/v1/remove_place/1
+                fetch(`/api/v1/remove_place/${placeId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Place deleted:', data);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error deleting device:', error);
+                });
+
+            } else {
+              
+            }
+        });
+
         chartInit();
-        changeDeviceTable(0);        
+        changeDeviceTable(0); 
+        $("#delete_place").hide();       
     });
 
 </script>
@@ -645,9 +730,15 @@
         <div id="header-text">전체</div>
 
         <select id="place_select_combo" style="width : 180px; margin-left:auto;margin-right: auto;"></select>
+
+        <div>
+            <span>ID : </span>
+            <div id="user_name" style="margin-right: 10px;display: inline-block;">test이름</div>
+        </div>
+        
         <div id="user_register" style="margin-right: 10px; cursor: pointer;">유저등록</div>
+        <div id="delete_place" style="margin-right: 10px; cursor: pointer;">장소삭제</div>
         <div id="device_register" style="margin-right: 10px; cursor: pointer;">기기등록</div>
-        <div id="user_name" style="margin-right: 10px;">test이름</div>
         <div id="logout_button" style="margin-right: 10px; cursor: pointer;">로그아웃</div>
     </header>
 

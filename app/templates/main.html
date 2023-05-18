@@ -516,7 +516,7 @@
 
             return Promise.all([
                 fetch('/api/v1/device_list/' + place_id),
-                fetch('/api/v1/place_name/' + place_id)
+                fetch('/api/v1/place_id/' + place_id)
             ]);
 
         })
