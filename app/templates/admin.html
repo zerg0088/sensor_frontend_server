@@ -152,7 +152,7 @@
             <td rowspan='3'><div><div>${device.name}</div><button style="margin-top:10px" id="graph_button_${device.id}" type="submit" class="btn btn-primary">그래프 보기</button></div></td>
             <td id="${device.id}_1_state">🟢</td>
             <td>CH1</td>
-            <td id="${device.id}_1_v"></td>
+            <td id="${device.id}_1_v">kV</td>
             <td id="${device.id}_1_a">mA</td>
             <td><input type="number" name="edittext" id="${device.id}_1_ba" value="${device.alert_a_rate1}"> mA</td>
             <!-- <td id="${device.id}_1_a"></td> -->
@@ -176,7 +176,7 @@
         <tr>
             <td id="${device.id}_2_state">🟢</td>
             <td>CH2</td>
-            <td id="${device.id}_2_v"></td>
+            <td id="${device.id}_2_v">kV</td>
             <td id="${device.id}_2_a">mA</td>
             <td><input type="number" name="edittext" id="${device.id}_2_ba" value="${device.alert_a_rate2}"> mA</td>
             <!-- <td id="${device.id}_2_a"></td> -->
@@ -186,7 +186,7 @@
         <tr>
             <td id="${device.id}_3_state">🟢</td>
             <td>CH3</td>
-            <td id="${device.id}_3_v"></td>
+            <td id="${device.id}_3_v">kV</td>
             <td id="${device.id}_3_a">mA</td>
             <td><input type="number" name="edittext" id="${device.id}_3_ba" value="${device.alert_a_rate3}"> mA</td>
             <!-- <td id="${device.id}_3_a"></td> -->
@@ -474,7 +474,8 @@
             }
             return response.json();
         }).then(data => {
-            alert("계정등록이 완료됐습니다.")
+            alert("계정등록이 완료됐습니다.");
+            location.reload();
         }).catch(error => {
             console.log(error);
         });        
@@ -516,8 +517,19 @@
         //var number = document.getElementById("device_number").value;
         var placeId = $("#device_place option:selected").val();
         
+        if(isNaN(id)) {
+            alert("잘못된 아이디 값 입니다.");
+            return;
+        }
+
+        if(name.length == 0) {
+            alert("장소 값이 없습니다.");
+            return;
+        }
+
         var url = '/api/v1/add_device';
         
+
         fetch(url,{
             method: "POST",
             headers: {
@@ -541,6 +553,7 @@
             return response.json();
         }).then(data => {
             alert("기기등록 했습니다.");
+            location.reload();
         }).catch(error => {
             console.log(error);
         });
@@ -733,13 +746,13 @@
 
         <div>
             <span>ID : </span>
-            <div id="user_name" style="margin-right: 10px;display: inline-block;">test이름</div>
+            <div id="user_name" style="margin-right: 20px;display: inline-block;">test이름</div>
         </div>
         
-        <div id="user_register" style="margin-right: 10px; cursor: pointer;">유저등록</div>
-        <div id="delete_place" style="margin-right: 10px; cursor: pointer;">장소삭제</div>
-        <div id="device_register" style="margin-right: 10px; cursor: pointer;">기기등록</div>
-        <div id="logout_button" style="margin-right: 10px; cursor: pointer;">로그아웃</div>
+        <div id="user_register" style="margin-right: 20px; cursor: pointer;">유저등록</div>
+        <div id="delete_place" style="margin-right: 20px; cursor: pointer;">장소삭제</div>
+        <div id="device_register" style="margin-right: 20px; cursor: pointer;">기기등록</div>
+        <div id="logout_button" style="margin-right: 20px; cursor: pointer;">로그아웃</div>
     </header>
 
     <table>
@@ -747,7 +760,7 @@
             <tr>
                 <th>설치 층 / 공조기 번호</th>
                 <th>상태</th>
-                <th>체널</th>
+                <th>채널</th>
                 <th>전압</th>
                 <th>전류</th>
                 <th>기준전류</th>
@@ -804,12 +817,12 @@
             <div style="display: flex; flex-direction: row;">
                 <div>
                     <span style="display:inline">디바이스 아이디 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_id" value="-1">
+                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_id" value="">
                 </div>
     
                 <div style="margin-left:10px">
                     <span style="display:inline">디바이스 이름 :</span>
-                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_name" value="-1">
+                    <input class="popup_input" style="display:inline; width : auto" type="text" id="device_name" value="">
                 </div>
             </div>
 
