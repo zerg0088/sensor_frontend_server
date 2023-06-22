@@ -209,16 +209,16 @@
                         v2Array.unshift(list[i].v2 != null ? list[i].v2 : 0);
                         v3Array.unshift(list[i].v3 != null ? list[i].v3 : 0);
 
-                        a1Array.unshift(list[i].a1 != null ? list[i].a1 : 0);
-                        a2Array.unshift(list[i].a2 != null ? list[i].a2 : 0);
-                        a3Array.unshift(list[i].a3 != null ? list[i].a3 : 0);
+                        a1Array.unshift(list[i].c1 != null ? list[i].c1 : 0);
+                        a2Array.unshift(list[i].c2 != null ? list[i].c2 : 0);
+                        a3Array.unshift(list[i].c3 != null ? list[i].c3 : 0);
 
                         chartDateArray.unshift(list[i].timestamp != null ? list[i].timestamp : 0);
                     }
 
                     var localDateList = chartDateArray.map(it => {
                         const inputDate = new Date(it);
-                        const addedHours = 9;
+                        const addedHours = 0;
                         inputDate.setHours(inputDate.getHours() + addedHours);
 
                         const year = inputDate.getFullYear();

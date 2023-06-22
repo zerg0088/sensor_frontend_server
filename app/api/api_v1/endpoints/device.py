@@ -86,8 +86,7 @@ def update_device(*, device_id: int, device_in: DeviceUpdate, db: Session = Depe
         )
     device = crud_device.update(db, db_obj=device, obj_in=device_in)
     return device   
-    
-    
+        
 # http://127.0.0.1:8000/api/v1/insert?did=1&v1=10&v2=20
 @router.get("/insert")
 def insert_data(did: int, v1 : int = None, v2 : int = None, v3 : int = None,
