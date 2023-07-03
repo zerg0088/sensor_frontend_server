@@ -17,6 +17,9 @@ from app.crud.place import crud_place
 from app.crud.device_value import crud_device_value
 from fastapi.encoders import jsonable_encoder
 from app.core.config import settings
+import csv
+from io import StringIO
+from fastapi.responses import StreamingResponse
 
 client = Client(settings.SMS_SID, settings.SMS_AUTH_TOKEN)
 router = APIRouter()
@@ -74,6 +77,25 @@ def chart(did: int, db: Session = Depends(get_db)) -> list[DeviceValueRead]:
     device_values = crud_device_value.get_chart_by_id(db, did)
     # print(device_values)
     return device_values
+
+# http://127.0.0.1:8000/api/v1/download/did
+@router.get("/download/{did}", response_model=list[DeviceValueRead])
+def download(did: int, db: Session = Depends(get_db)):
+    device_values = crud_device_value.get_datas_by_id(db, did)
+
+    csv_data = StringIO()
+    writer = csv.writer(csv_data)
+    writer.writerows(device_values)
+
+    response = StreamingResponse(
+        iter([csv_data.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=data.csv"
+        }
+    )
+
+    return response
     
 # 기준 전류 셋팅. 
 @router.patch("/device_update/{device_id}", response_model=DeviceRead)

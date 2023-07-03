@@ -15,6 +15,9 @@ class CRUDDeviceValue(CRUDBase[DeviceValue, DeviceValueCreate, DeviceValueUpdate
     def get_chart_by_id(self, db: Session, did: int) -> list[DeviceValue]:
         return db.query(self.model.v1,self.model.v2,self.model.v3,self.model.c1,self.model.c2,self.model.c3,self.model.timestamp).filter(self.model.did == did).order_by(self.model.timestamp.desc()).limit(150).all()
     
+    def get_datas_by_id(self, db: Session, did: int) -> list[DeviceValue]:
+        return db.query(self.model.v1,self.model.v2,self.model.v3,self.model.c1,self.model.c2,self.model.c3,self.model.timestamp).filter(self.model.did == did).order_by(self.model.timestamp.desc()).all()
+    
     def get_all2(self, db: Session) -> list[DeviceValue]:
         return db.query(DeviceValue).all()
     

@@ -168,7 +168,11 @@
                     <button id="a_button_${device.id}" type="submit" class="btn btn-primary">기준전류 셋팅</button>
                 </div>
                 <div>
-                    <button id="delete_button_${device.id}" type="submit" class="btn btn-primary delete_button" style="margin-top:10px">디바이스 삭제</button>
+                    <button id="delete_button_${device.id}" type="submit" class="btn btn-primary delete_button" style="margin-top:6px">디바이스 삭제</button>
+                </div>
+
+                <div>
+                    <button id="download_button_${device.id}" type="submit" class="btn btn-primary download_button" style="margin-top:6px">데이터 다운로드</button>
                 </div>
             
             </td>
@@ -241,22 +245,53 @@
 
         $("#delete_button_" + device.id).click( function() {    
             
-            fetch(`/api/v1/remove_device/${device.id}`, {
-                method: 'DELETE',
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Device deleted:', data);
+            var result = confirm('디바이스를 삭제하시겠습니까?');
+            // var placeId = $("#place_select_combo option:selected").val();
 
-                // list delete
-                var index = $('.delete_button').index(this);
-                for(var i = 0;i < 3 ;i++) {
-                    console.log((index * 3 + i));
-                    $('#table tr').eq(index * 3).remove();
-                }
+            if (result) {
+                fetch(`/api/v1/remove_device/${device.id}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Device deleted:', data);
+    
+                    // list delete
+                    var index = $('.delete_button').index(this);
+                    for(var i = 0;i < 3 ;i++) {
+                        console.log((index * 3 + i));
+                        $('#table tr').eq(index * 3).remove();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting device:', error);
+                });
+            } else {
+              
+            }
+        });
+
+        $("#download_button_" + device.id).click( function() {    
+        
+            fetch(`/api/v1/download/${device.id}`)
+            .then(response => {
+            // 파일 이름 추출
+            const contentDisposition = response.headers.get('Content-Disposition');
+            const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+            const filename = filenameMatch && filenameMatch[1] ? filenameMatch[1] : 'data.csv';
+
+            // 파일 다운로드
+            response.blob().then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.click();
+                window.URL.revokeObjectURL(url);
+            });
             })
             .catch(error => {
-                console.error('Error deleting device:', error);
+                console.error('CSV 다운로드 중 오류 발생:', error);
             });
         });
 
