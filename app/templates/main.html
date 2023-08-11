@@ -32,9 +32,14 @@
     }
 
     function getCleanStateColor(base, current) {
-        var value = base - 1500;
+        var value = base * 1000 - 1500;
+
         if(value < 0) value = 0;
         
+        if (current == 0) {
+            return "🟢";
+        }
+
         if (value > current) {
             return "🟠";
         } else {
