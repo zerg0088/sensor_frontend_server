@@ -38,7 +38,10 @@
     }
 
     function getCleanStateColor(base, current) {
-        var value = base * 1000 - 1500;
+        console.log("base : " + base + ", current : " + current);
+
+        value = base * 1000 - 1500;
+        current = current * 1000;
 
         if(value < 0) value = 0;
         
