@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Form
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import urllib
 
@@ -41,4 +41,6 @@ async def main(request: Request, db: Session = Depends(get_db)):
     places = crud_place.get_all(db)
     return templates.TemplateResponse("admin.html", {"request": request, "devices": devices, "places" : places}) 
 
-    
+@router.get("/", response_class=RedirectResponse, include_in_schema=False)
+async def root_redirect():
+    return "/main"

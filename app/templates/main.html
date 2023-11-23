@@ -135,10 +135,165 @@
                 }
             }
         });
+
+        ////////
+
+        var ctx = document.getElementById('chart_pm25');
+        lineChartPM25 = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'PM2.5',
+                    data: [],
+                    borderWidth: 1,
+                    pointRadius: 1,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        align: 'start'
+                    },
+                    
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        display: false // x축 라벨 비활성화
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById('chart_pm10');
+        lineChartPM10 = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'PM10',
+                    data: [],
+                    borderWidth: 1,
+                    pointRadius: 1,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        align: 'start'
+                    },
+                    
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        display: false // x축 라벨 비활성화
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById('chart_voc');
+        lineChartVOC = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'VOC',
+                    data: [],
+                    borderWidth: 1,
+                    pointRadius: 1,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        align: 'start'
+                    },
+                    
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        display: false // x축 라벨 비활성화
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById('chart_humi');
+        lineChartHumi = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Humi',
+                    data: [],
+                    borderWidth: 1,
+                    pointRadius: 1,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        align: 'start'
+                    },
+                    
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        display: false // x축 라벨 비활성화
+                    }
+                }
+            }
+        });
+
+        var ctx = document.getElementById('chart_temp');
+        lineChartTemp = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Temp',
+                    data: [],
+                    borderWidth: 1,
+                    pointRadius: 1,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        align: 'start'
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    x: {
+                        display: false // x축 라벨 비활성화
+                    }
+                }
+            }
+        });
     }
 
     function drawLineChart(chart, dateList, array1, array2, array3) {
-
         chart.data.labels = dateList;
         chart.data.datasets[0].data = array1;
         chart.data.datasets[1].data = array2;
@@ -147,6 +302,12 @@
         chart.update();
     }
 
+    function draw1LineChart(chart, dateList, array1) {
+        chart.data.labels = dateList;
+        chart.data.datasets[0].data = array1;
+        
+        chart.update();
+    }
 
     function makeDeviceCell(device) {
         var cell = 
@@ -159,9 +320,21 @@
             <td id="${device.id}_1_a">mA</td>
             
             <td id="${device.id}_1_clean_state">🟢</td>
-            <td rowspan='3'></td>
-            <td rowspan='3'></td>
-            <td rowspan='3'></td>
+            <td rowspan='3'>
+                <span id="${device.id}_pm25">0</span>
+            </td>
+            <td rowspan='3'>
+                <span id="${device.id}_pm10">0</span>
+            </td>
+            <td rowspan='3'>
+                <span id="${device.id}_voc">0</span>
+            </td>
+            <td rowspan='3'>
+                <span id="${device.id}_humi">0</span>
+            </td>
+            <td rowspan='3'>
+                <span id="${device.id}_temp">0</span>
+            </td>
             
         </tr>
         <tr>
@@ -210,6 +383,12 @@
                     var a2Array = [];
                     var a3Array = [];
 
+                    var pm25Array = [];
+                    var pm10Array = [];
+                    var vocArray = [];
+                    var humiArray = [];
+                    var tempArray = [];
+
                     chartDateArray = [];
                     
                     for (var i = 0; i<list.length;i++) {
@@ -220,6 +399,12 @@
                         a1Array.unshift(list[i].c1 != null ? list[i].c1 : 0);
                         a2Array.unshift(list[i].c2 != null ? list[i].c2 : 0);
                         a3Array.unshift(list[i].c3 != null ? list[i].c3 : 0);
+
+                        pm25Array.unshift(list[i].r1 != null ? list[i].r1 : 0);
+                        pm10Array.unshift(list[i].r2 != null ? list[i].r2 : 0);
+                        vocArray.unshift(list[i].r3 != null ? list[i].r3 : 0);
+                        humiArray.unshift(list[i].r4 != null ? list[i].r4 : 0);
+                        tempArray.unshift(list[i].r5 != null ? list[i].r5 : 0);
 
                         chartDateArray.unshift(list[i].timestamp != null ? list[i].timestamp : 0);
                     }
@@ -243,6 +428,12 @@
 
                     drawLineChart(lineChartV, localDateList, v1Array.map(it => it/1000), v2Array.map(it => it/1000), v3Array.map(it => it/1000));
                     drawLineChart(lineChartA, localDateList, a1Array.map(it => it/1000), a2Array.map(it => it/1000), a3Array.map(it => it/1000));
+
+                    draw1LineChart(lineChartPM25, localDateList, pm25Array);
+                    draw1LineChart(lineChartPM10, localDateList, pm10Array);
+                    draw1LineChart(lineChartVOC, localDateList, vocArray);
+                    draw1LineChart(lineChartHumi, localDateList, humiArray.map(it => (it/10).toFixed(1)));
+                    draw1LineChart(lineChartTemp, localDateList, tempArray.map(it => (it/10).toFixed(1)));
 
                 }).catch(error => {
                     console.log(error);
@@ -283,6 +474,13 @@
                 $("#" + id + "_1_clean_state").text(getCleanStateColor(device.alert_a_rate1, data.c1/1000));
                 $("#" + id + "_2_clean_state").text(getCleanStateColor(device.alert_a_rate2, data.c2/1000));
                 $("#" + id + "_3_clean_state").text(getCleanStateColor(device.alert_a_rate3, data.c3/1000));
+
+                $("#" + id + "_pm25").text(data.r1/1 + "μg/m³");
+                $("#" + id + "_pm10").text(data.r2/1 + "μg/m³");
+                $("#" + id + "_voc").text(data.r3/1 + "ppm");
+                $("#" + id + "_humi").text((data.r4/10).toFixed(1) + "%");
+                $("#" + id + "_temp").text((data.r5/10).toFixed(1) + "°C");
+                
               }).catch(error => {
                 console.log(error);
               });
@@ -615,9 +813,11 @@
                 <th>전압</th>
                 <th>전류</th>
                 <th>청소</th>
-                <th>온도</th>
+                <th>PM2.5</th>
+                <th>PM10</th>
+                <th>VOC</th>
                 <th>습도</th>
-                <th>차압</th>
+                <th>온도</th>
 
             </tr>
         </thead>
@@ -626,13 +826,38 @@
     </table>
 
     <div id="drawer" class="closed">
-        <span class="graph_title">전압 그래프</span>
-        <div>
-            <canvas class="chart" id="chart_v"></canvas>
-        </div>
-        <span class="graph_title">전류 그래프</span>
-        <div>
-            <canvas class="chart" id="chart_a"></canvas>
+        <div style="overflow-y: auto; height:100%">
+            <span class="graph_title">전압 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_v"></canvas>
+            </div>
+            <span class="graph_title">전류 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_a"></canvas>
+            </div>
+
+            <span class="graph_title">PM2.5 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_pm25"></canvas>
+            </div>
+            <span class="graph_title">PM10 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_pm10"></canvas>
+            </div>
+
+            <span class="graph_title">VOC 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_voc"></canvas>
+            </div>
+            <span class="graph_title">습도 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_humi"></canvas>
+            </div>
+
+            <span class="graph_title">온도 그래프</span>
+            <div>
+                <canvas class="chart" id="chart_temp"></canvas>
+            </div>
         </div>
     </div>
 
